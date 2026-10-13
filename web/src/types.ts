@@ -52,6 +52,15 @@ export type TestEvent =
   | { type: 'output'; data: string }
   | ({ type: 'result' } & TestResult)
 
+export type Lesson = {
+  task: string
+  title: string
+  kind: 'PROJECT' | 'QUIZ' | null
+  markdown: string | null
+  has_stubs: boolean
+}
+export type WeekLessons = { week: number; title: string; unlocked: boolean; lessons: Lesson[] }
+
 export type Attempt = { score: number; total: number; pass_mark: number; passed: boolean; at: string; by: string }
 export type QuizSummary = {
   id: string

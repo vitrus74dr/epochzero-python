@@ -1,0 +1,42 @@
+{
+  "id": "W1.2.quiz",
+  "title": "Boolean logic and truthiness",
+  "pass_mark": 4,
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "What does `not (True and False)` evaluate to?",
+      "choices": ["True", "False", "None", "SyntaxError"],
+      "answer": 0,
+      "explain": "`True and False` is `False`, and `not` flips it to `True`. The parentheses decide what `not` applies to."
+    },
+    {
+      "id": "q2",
+      "prompt": "Which of these values is **truthy**?",
+      "choices": ["`0`", "`\"\"`", "`\"0\"`", "`[]`"],
+      "answer": 2,
+      "explain": "Any non-empty string is truthy, even `\"0\"` and `\"False\"`. Zero, the empty string and empty containers are falsy."
+    },
+    {
+      "id": "q3",
+      "prompt": "What does `print(0 or \"hello\")` print?",
+      "choices": ["`True`", "`0`", "`hello`", "`False`"],
+      "answer": 2,
+      "explain": "`or` returns the first truthy operand, not a bool. `0` is falsy, so you get `\"hello\"`, which is why `name or \"stranger\"` works as a default."
+    },
+    {
+      "id": "q4",
+      "prompt": "What does this print?\n\n```python\nanswer = \"n\"\nif answer == \"y\" or \"yes\":\n    print(\"go\")\nelse:\n    print(\"stop\")\n```",
+      "choices": ["`go`", "`stop`", "Nothing", "A `SyntaxError`"],
+      "answer": 0,
+      "explain": "It reads as `(answer == \"y\") or \"yes\"`. The comparison is `False`, but `\"yes\"` is a non-empty string, so the whole condition is truthy. Write `answer == \"y\" or answer == \"yes\"`, or `answer in (\"y\", \"yes\")`."
+    },
+    {
+      "id": "q5",
+      "prompt": "What does this print?\n\n```python\nx = 7\nif x > 5:\n    print(\"A\")\nelif x > 3:\n    print(\"B\")\nelse:\n    print(\"C\")\n```",
+      "choices": ["`A`", "`A` then `B`", "`B`", "`C`"],
+      "answer": 0,
+      "explain": "Only the first branch whose condition is true runs. `x > 3` is also true, but `elif` is never checked once `if` has matched."
+    }
+  ]
+}

@@ -87,6 +87,7 @@ export function Dashboard({ data, onUpdate }: Props) {
               <Cursor />
             </p>
             <p className="muted">
+              {cur.task && <><a className="hdr-btn" href={hrefFor('lesson', cur.task)}>[ lesson ]</a>{' '}</>}
               {cur.task ? `Task ${cur.task}: ${cur.task_title}` : cur.task_title}
               {cur.item.verified
                 ? ' · verified, ready to tick'

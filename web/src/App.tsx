@@ -11,6 +11,7 @@ import { useTracker } from './useTracker'
 import type { TestResult } from './types'
 import { Dashboard } from './views/Dashboard'
 import { DocView } from './views/Doc'
+import { LessonView } from './views/Lesson'
 import { QuizView } from './views/Quiz'
 import { Workbench } from './views/Workbench'
 
@@ -54,6 +55,7 @@ export default function App() {
         window.clearTimeout(chord.current)
         chord.current = null
         if (e.key === 'd') navigate('dashboard')
+        else if (e.key === 'l') navigate('lesson')
         else if (e.key === 'w') navigate('workbench', workbenchFile)
         else if (e.key === 'q') navigate('quiz')
         return
@@ -90,6 +92,8 @@ export default function App() {
           <nav className="nav" aria-label="Views">
             <a href={hrefFor('dashboard')} className={route.view === 'dashboard' ? 'is-on' : ''}
                title="g d">dashboard</a>
+            <a href={hrefFor('lesson')} className={route.view === 'lesson' ? 'is-on' : ''}
+               title="g l">lesson</a>
             <a href={hrefFor('workbench', workbenchFile)} className={onWorkbench ? 'is-on' : ''}
                title="g w">workbench</a>
             <a href={hrefFor('quiz')} className={route.view === 'quiz' ? 'is-on' : ''}
@@ -109,6 +113,7 @@ export default function App() {
         )}
 
         {route.view === 'dashboard' && data && <Dashboard data={data} onUpdate={setData} />}
+        {route.view === 'lesson' && data && <LessonView taskId={route.file} data={data} onUpdate={setData} />}
         {route.view === 'quiz' && ready && <QuizView quizId={route.file} />}
         {route.view === 'doc' && ready && <DocView path={route.file} />}
         {workbenchMounted && <Workbench file={workbenchFile} visible={onWorkbench}

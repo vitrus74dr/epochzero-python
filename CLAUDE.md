@@ -28,6 +28,9 @@ source of truth for learner progress; never renumber or reword its item IDs.
   commands with shell variable expansion, and the tutor session can only touch `workspace/`,
   so anything outside it (tracker, progress/, curriculum/) needs a `pygrid-tutor` subcommand.
 - Task folders are `workspace/weekN/tN.M-<slug>/` (`server/tasks.py`).
+- Curriculum content: `curriculum/weekN/lesson_N_M.md`, `quiz_N_M.json`, `stubs/tN.M-<slug>/`.
+  Stubs hold tests plus signature-only code, never solutions; `tests/test_lessons.py` checks
+  every stub test fails cleanly (fails, doesn't error) until implemented.
 - Colours come from `web/src/theme/tokens.css` only. `tests/test_contrast.py` enforces
   WCAG AA on every text/surface pair; if you change a token, the test must still pass.
 - xterm.js and CodeMirror can't read CSS variables: build their themes from

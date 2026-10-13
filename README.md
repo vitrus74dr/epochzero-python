@@ -9,6 +9,12 @@ uv run pygrid
 
 Requires `uv` and `pnpm`. The first run builds the web UI.
 
+## Lessons
+Each task has a lesson (`g l`, or `[ lesson ]` on the dashboard) with its acceptance
+criteria pinned on top. Week 1 ships in `curriculum/week1/` along with the W1.2 quiz and
+starter tests (`stubs/`, copied in by `pygrid-tutor scaffold`). Later weeks are written
+just-in-time by the tutor (`pygrid-tutor lesson-add`).
+
 ## Tests and quizzes
 - **Tests:** in the workbench, `Ctrl/Cmd+Shift+Enter` runs pytest on the open file's
   folder, in the nearest workspace `uv` project (add pytest there: `uv add --dev pytest`).

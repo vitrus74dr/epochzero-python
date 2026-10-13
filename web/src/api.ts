@@ -1,4 +1,4 @@
-import type { QuizList, QuizResult, QuizSpec, TestEvent, TrackerData } from './types'
+import type { QuizList, WeekLessons, QuizResult, QuizSpec, TestEvent, TrackerData } from './types'
 
 export type SessionState = 'ok' | 'expired' | 'offline'
 
@@ -74,6 +74,8 @@ export const writeFile = (path: string, content: string, baseVersion: string | n
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content, base_version: baseVersion, force }),
   })
+
+export const getLessons = (week: number) => call<WeekLessons>(`/api/lessons/${week}`)
 
 export const getQuizzes = () => call<QuizList>('/api/quizzes')
 

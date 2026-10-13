@@ -5,6 +5,7 @@ export type Shortcut = { keys: string; label: string }
 
 export const SHORTCUTS: Shortcut[] = [
   { keys: 'g d', label: 'Dashboard' },
+  { keys: 'g l', label: 'Lesson for the current task' },
   { keys: 'g w', label: 'Workbench' },
   { keys: 'g q', label: 'Quizzes' },
   { keys: 'Ctrl/Cmd + Enter', label: 'Save and run current file' },

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getQuiz, getQuizzes, submitQuiz } from '../api'
 import { Inline } from '../components/Inline'
+import { Markdown } from '../components/Markdown'
 import { Panel } from '../components/Panel'
 import { Tag } from '../components/Tag'
 import { Terminal } from '../components/Terminal'
@@ -62,13 +63,17 @@ export function QuizView({ quizId }: { quizId: string | null }) {
         ))}
       </Panel>
       {/* Keyed so switching quizzes starts from a clean slate. */}
-      <QuizDetail key={quizId ?? ''} quizId={quizId}
+      <QuizDetail key={quizId ?? ''} quizId={quizId} onSubmitted={refreshList}
                   summary={list?.quizzes.find((q) => q.id === quizId) ?? null} />
     </div>
   )
 }
 
-function QuizDetail({ quizId, summary }: { quizId: string | null; summary: QuizSummary | null }) {
+function QuizDetail({ quizId, summary, onSubmitted }: {
+  quizId: string | null
+  summary: QuizSummary | null
+  onSubmitted: () => void
+}) {
   const [spec, setSpec] = useState<QuizSpec | null>(null)
   const [mode, setMode] = useState<Mode>('intro')
   const [index, setIndex] = useState(0)
@@ -102,10 +107,11 @@ function QuizDetail({ quizId, summary }: { quizId: string | null; summary: QuizS
     if (r.ok) {
       setResult(r.data)
       setMode('result')
+      onSubmitted()
     } else {
       setError(r.error)
     }
-  }, [spec, answers, allAnswered])
+  }, [spec, answers, allAnswered, onSubmitted])
 
   const choose = (choice: number) => {
     if (!question) return
@@ -188,7 +194,7 @@ function QuizDetail({ quizId, summary }: { quizId: string | null; summary: QuizS
               </span>
             ))}
           </p>
-          <p className="quiz-prompt"><Inline text={question.prompt} /></p>
+          <div className="quiz-prompt"><Markdown text={question.prompt} /></div>
           <ol className="quiz-choices">
             {question.choices.map((c, i) => {
               const on = answers[question.id] === i
@@ -224,8 +230,8 @@ function QuizDetail({ quizId, summary }: { quizId: string | null; summary: QuizS
           <ul className="quiz-review">
             {result.results.map((r, i) => (
               <li key={r.id}>
-                <Tag kind={r.correct ? 'pass' : 'fail'} />{' '}
-                <Inline text={spec.questions[i].prompt} />
+                <Tag kind={r.correct ? 'pass' : 'fail'} />
+                <Markdown text={spec.questions[i].prompt} compact />
                 {r.correct && r.explain && <p className="muted quiz-explain"><Inline text={r.explain} /></p>}
               </li>
             ))}

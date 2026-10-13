@@ -7,12 +7,14 @@ VerificationLog for tutor/artifact records. The app sees every change live
 through its file watcher.
 
     pygrid-tutor status
+    pygrid-tutor scaffold W1.3                      # copy the task's starter files/tests
     pygrid-tutor verify W1.3 [--path week1/t1.3-calculator]   # or one item: W1.3.c
     pygrid-tutor record W1.1.a --kind tutor --summary "uv venv on 3.12 confirmed"
     pygrid-tutor record W1.3.a --kind artifact
     pygrid-tutor checkoff W1.3.c [--undo]
     pygrid-tutor quiz-check .pygrid/quiz_1_2.json
     pygrid-tutor quiz-add .pygrid/quiz_1_2.json      # validate, install into curriculum/
+    pygrid-tutor lesson-add 2.1 .pygrid/lesson_2_1.md  # install a just-in-time lesson
     pygrid-tutor quiz-results W1.2.quiz
 
 Claude Code only lets the tutor session touch files inside workspace/, so
@@ -33,7 +35,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from server import quizzes
+from server import lessons, quizzes
 from server import tracker as tr
 from server.fs import SandboxError, resolve_in
 from server.paths import ROOT, Paths
@@ -260,6 +262,50 @@ def cmd_quiz_check(paths: Paths, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_scaffold(paths: Paths, args: argparse.Namespace) -> int:
+    task_id = args.task.removeprefix("W")
+    t = tr.load(paths.tracker)
+    week, _ = find_task(t, task_id)
+    if not t.week_unlocked(week.n):
+        raise Refused(f"week {week.n} is locked")
+    try:
+        dest, copied, skipped = lessons.scaffold(paths, task_id)
+    except FileNotFoundError as e:
+        raise Refused(f"{e}: write the starter tests yourself (tests first)") from None
+    except FolderError as e:
+        raise Refused(str(e)) from None
+    rel = dest.relative_to(paths.workspace).as_posix()
+    print(f"folder: {rel}/")
+    for f in copied:
+        print(f"  copied  {f}")
+    for f in skipped:
+        print(f"  kept    {f} (already exists; not overwritten)")
+    print("Read the copied files before teaching from them: the tests are the spec.")
+    return 0
+
+
+def cmd_lesson_add(paths: Paths, args: argparse.Namespace) -> int:
+    task_id = args.task.removeprefix("W")
+    t = tr.load(paths.tracker)
+    week, task = find_task(t, task_id)
+    if not t.week_unlocked(week.n):
+        raise Refused(f"week {week.n} is locked; write its lessons when it opens")
+    try:
+        text = Path(args.file).read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as e:
+        raise Usage(str(e)) from None
+    if not text.lstrip().startswith("# "):
+        print("invalid: a lesson starts with a `# Title` heading")
+        return 1
+    dest = lessons.lesson_path(paths, task_id)
+    existed = dest.exists()
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tr.write_atomic(dest, text if text.endswith("\n") else text + "\n")
+    print(f"{'replaced' if existed else 'installed'}: {dest.relative_to(paths.root).as_posix()} "
+          f"(task {task.id}: {task.title})")
+    return 0
+
+
 def cmd_quiz_add(paths: Paths, args: argparse.Namespace) -> int:
     """Validate a draft written inside workspace/ and install it as
     curriculum/weekN/quiz_N_M.json, replacing any earlier version."""
@@ -336,6 +382,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--recent", type=int, default=5)
     p.set_defaults(fn=cmd_status)
 
+    p = sub.add_parser("scaffold", help="copy a task's starter files and tests into its folder")
+    p.add_argument("task")
+    p.set_defaults(fn=cmd_scaffold)
+
     p = sub.add_parser("verify", help="run pytest for a task (W1.3) or item (W1.3.c) and record it")
     p.add_argument("target")
     p.add_argument("--path", help="test folder or file in workspace/ (default: the task folder)")
@@ -360,6 +410,11 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("quiz-add", help="validate a draft spec and install it into curriculum/")
     p.add_argument("file")
     p.set_defaults(fn=cmd_quiz_add)
+
+    p = sub.add_parser("lesson-add", help="install a lesson for a task into curriculum/")
+    p.add_argument("task")
+    p.add_argument("file")
+    p.set_defaults(fn=cmd_lesson_add)
 
     p = sub.add_parser("quiz-results", help="latest attempt, with answers to missed questions")
     p.add_argument("quiz_id")

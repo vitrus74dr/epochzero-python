@@ -28,4 +28,5 @@ Run the design interview for project task `$ARGUMENTS` before any code is writte
 5. Ask the learner to read it (cockpit dashboard: the task's `[ plan ]` link) and approve it. When
    they approve: `pygrid-tutor record WN.M.a --kind artifact --summary "plan approved by learner"`,
    then `/checkoff WN.M.a`.
-6. Next (per CLAUDE.md): scaffold the files and write the tests first.
+6. Next (per CLAUDE.md): `pygrid-tutor scaffold WN.M`, read the starter tests, and add tests for the
+   functions in the plan, before the learner writes any logic.

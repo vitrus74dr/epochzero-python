@@ -4,9 +4,9 @@ import remarkGfm from 'remark-gfm'
 
 /** Rendered markdown for plans, walkthroughs and (later) lessons. Raw HTML is
  *  not rendered. Syntax colours come from tokens via the .hljs-* rules in app.css. */
-export function Markdown({ text }: { text: string }) {
+export function Markdown({ text, compact }: { text: string; compact?: boolean }) {
   return (
-    <div className="md">
+    <div className={compact ? 'md md-compact' : 'md'}>
       <ReactMarkdown remarkPlugins={[remarkGfm]}
                      rehypePlugins={[[rehypeHighlight, { detect: false, ignoreMissing: true }]]}
                      components={{ a: ({ href, children }) => (

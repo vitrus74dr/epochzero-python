@@ -17,6 +17,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 
+from server import progress
 from server import tracker as tr
 from server.paths import Paths
 from server.tasks import task_folder
@@ -61,7 +62,7 @@ def router(paths: Paths) -> APIRouter:
     @r.get("/{week}")
     def week_lessons(week: int):
         try:
-            t = tr.load(paths.tracker)
+            t = progress.load_state(paths)
         except tr.TrackerError as e:
             raise HTTPException(422, str(e)) from None
         w = next((w for w in t.weeks if w.n == week), None)

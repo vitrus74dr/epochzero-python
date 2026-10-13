@@ -56,6 +56,8 @@ def classify(path: Path, root: Path) -> str | None:
     if parts[0] == "progress":
         if parts[1:] == ("verifications.jsonl",):
             return "verifications"
+        if parts[1:] == ("checked.json",):
+            return "tracker"                    # ticks changed: same refresh as a tracker edit
         if len(parts) > 1 and parts[1] == "quizzes":
             return "quizzes"
         return None

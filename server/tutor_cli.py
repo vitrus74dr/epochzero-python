@@ -36,6 +36,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from server import lessons, quizzes
+from server import progress
 from server import tracker as tr
 from server.fs import SandboxError, resolve_in
 from server.paths import ROOT, Paths
@@ -84,7 +85,7 @@ def workspace_path(paths: Paths, given: str) -> Path:
 # ── commands ──────────────────────────────────────────────────────────────
 
 def cmd_status(paths: Paths, args: argparse.Namespace) -> int:
-    t = tr.load(paths.tracker)
+    t = progress.load_state(paths)
     log = VerificationLog(paths.verifications)
     passing = log.passing_items()
     cur = t.current()
@@ -126,7 +127,7 @@ def cmd_status(paths: Paths, args: argparse.Namespace) -> int:
 
 
 def cmd_verify(paths: Paths, args: argparse.Namespace) -> int:
-    t = tr.load(paths.tracker)
+    t = progress.load_state(paths)
     target = args.target.removeprefix("T")
     if ITEM_RE.match(target):
         items, task_id = [target], task_of(target)
@@ -200,7 +201,7 @@ def artifact_check(paths: Paths, item: tr.Item) -> str:
 
 
 def cmd_record(paths: Paths, args: argparse.Namespace) -> int:
-    t = tr.load(paths.tracker)
+    t = progress.load_state(paths)
     try:
         item = t.item(args.item)
     except KeyError:
@@ -252,7 +253,7 @@ def cmd_quiz_check(paths: Paths, args: argparse.Namespace) -> int:
             print(f"invalid: {'.'.join(map(str, err['loc'])) or 'spec'}: {err['msg']}")
         return 1
     try:
-        item = quizzes.item_for(quiz, tr.load(paths.tracker))
+        item = quizzes.item_for(quiz, progress.load_state(paths))
     except quizzes.QuizError as e:
         print(f"invalid: {e}")
         return 1
@@ -264,7 +265,7 @@ def cmd_quiz_check(paths: Paths, args: argparse.Namespace) -> int:
 
 def cmd_scaffold(paths: Paths, args: argparse.Namespace) -> int:
     task_id = args.task.removeprefix("W")
-    t = tr.load(paths.tracker)
+    t = progress.load_state(paths)
     week, _ = find_task(t, task_id)
     if not t.week_unlocked(week.n):
         raise Refused(f"week {week.n} is locked")
@@ -286,7 +287,7 @@ def cmd_scaffold(paths: Paths, args: argparse.Namespace) -> int:
 
 def cmd_lesson_add(paths: Paths, args: argparse.Namespace) -> int:
     task_id = args.task.removeprefix("W")
-    t = tr.load(paths.tracker)
+    t = progress.load_state(paths)
     week, task = find_task(t, task_id)
     if not t.week_unlocked(week.n):
         raise Refused(f"week {week.n} is locked; write its lessons when it opens")
@@ -329,7 +330,7 @@ def cmd_quiz_add(paths: Paths, args: argparse.Namespace) -> int:
             print(f"invalid: {quiz.id} is already defined in {other.relative_to(paths.root)}")
             return 1
     try:
-        item = quizzes.item_for(quiz, tr.load(paths.tracker))
+        item = quizzes.item_for(quiz, progress.load_state(paths))
     except quizzes.QuizError as e:
         print(f"invalid: {e}")
         return 1
@@ -430,7 +431,7 @@ def main(argv: list[str] | None = None) -> int:
     except Refused as e:
         print(f"refused: {e}")
         return 1
-    except (tr.TrackerError, FileNotFoundError) as e:
+    except (tr.TrackerError, progress.ProgressError, FileNotFoundError) as e:
         print(f"epochzero-tutor: {e}", file=sys.stderr)
         return 2
 

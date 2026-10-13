@@ -4,8 +4,10 @@ This repo root is the **app-dev zone**: write complete, working code normally.
 `workspace/` is the **tutor zone** and has its own `workspace/CLAUDE.md` (Socratic rules);
 those rules apply only to the learner's code there.
 
-Read `HANDOFF.md` for the spec and build phases. `CURRICULUM_TRACKER.md` is the
-source of truth for learner progress; never renumber or reword its item IDs.
+Read `HANDOFF.md` for the original spec and build phases. `CURRICULUM_TRACKER.md` is the
+curriculum (weeks, tasks, item IDs and wording); never renumber or reword an item
+(`tests/fixtures/tracker_items.txt` pins them). A learner's ticks are NOT in that file: they
+live in `progress/checked.json` (`server/progress.py`), so students can `git pull` updates.
 
 ## Commands
 - `uv run epochzero` builds `web/dist` if missing, serves on 127.0.0.1:8765, opens the browser
@@ -25,7 +27,8 @@ source of truth for learner progress; never renumber or reword its item IDs.
 - Bind 127.0.0.1 only. Every /api route (HTTP, SSE, WebSocket) goes through
   `GuardMiddleware` in `server/main.py`: Host/Origin allow-list + session cookie.
 - Ticking goes through `check_item()` in `server/tracker_api.py` (tracker lock + verification
-  gate + week lock). Never write `[x]` into the tracker by any other route.
+  gate + week lock), which writes `progress/checked.json`. Every reader uses
+  `progress.load_state(paths)`, never `tracker.load()` directly. The tracker file is never written.
 - Which kind of record may verify an item is decided by `verify_kind()` in
   `server/verifications.py`: a pytest run only records "pytest" items, a quiz only its
   task's "Quiz:" item. Answers and explanations for missed questions never reach the browser.

@@ -31,6 +31,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from server import progress
 from server import tracker as tr
 from server.fs import SandboxError, resolve_in
 from server.paths import Paths
@@ -90,7 +91,7 @@ def summarize(tests: list[dict], exit_code: int | None) -> tuple[bool, str, dict
 
 def check_item_for_pytest(paths: Paths, item_id: str) -> None:
     """A pytest run may only record against an existing, unlocked pytest item."""
-    t = tr.load(paths.tracker)
+    t = progress.load_state(paths)
     try:
         item = t.item(item_id)
     except KeyError:

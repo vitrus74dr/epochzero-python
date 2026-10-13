@@ -23,6 +23,10 @@ class Paths:
         return self.root / "progress"
 
     @property
+    def checked(self) -> Path:
+        return self.progress / "checked.json"
+
+    @property
     def verifications(self) -> Path:
         return self.progress / "verifications.jsonl"
 

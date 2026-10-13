@@ -10,6 +10,7 @@ from server.watch import EventHub, classify, watch_root
 @pytest.mark.parametrize("rel,kind", [
     ("CURRICULUM_TRACKER.md", "tracker"),
     ("progress/verifications.jsonl", "verifications"),
+    ("progress/checked.json", "tracker"),
     ("progress/quizzes/W1.2.quiz.json", "quizzes"),
     ("workspace/week1/calc.py", "workspace"),
     ("curriculum/week1/quiz_1_2.json", "curriculum"),

@@ -25,6 +25,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
+from server import progress
 from server import tracker as tr
 from server.paths import Paths
 from server.tracker import locked, write_atomic
@@ -152,7 +153,7 @@ def grade(quiz: Quiz, answers: dict[str, int]) -> dict:
 def record_attempt(paths: Paths, quiz: Quiz, answers: dict[str, int], by: str) -> dict:
     """Grade, append to progress/quizzes/<id>.json and the verification log.
     Refused for a locked week, so a quiz can't verify ahead of the gate."""
-    t = tr.load(paths.tracker)
+    t = progress.load_state(paths)
     item = item_for(quiz, t)
     if not week_unlocked(t, quiz):
         raise QuizError(f"{quiz.id} is in a locked week")
@@ -220,7 +221,7 @@ def router(paths: Paths) -> APIRouter:
     def list_quizzes():
         quizzes, errors = load_all(paths.curriculum)
         try:
-            t: tr.Tracker | None = tr.load(paths.tracker)
+            t: tr.Tracker | None = progress.load_state(paths)
         except (OSError, tr.TrackerError):
             t = None
         out = []

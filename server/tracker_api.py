@@ -1,5 +1,6 @@
 """Tracker endpoints, and the single tick rule shared by the app and Claude Code:
-no passing verification record, no tick."""
+no passing verification record, no tick. Ticks are stored in
+progress/checked.json (server/progress.py); the tracker file is read-only."""
 
 from __future__ import annotations
 
@@ -7,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from server import progress
 from server import tracker as tr
 from server.paths import Paths
 from server.tasks import task_docs
@@ -24,7 +26,7 @@ def check_item(paths: Paths, item_id: str, checked: bool = True) -> tr.Tracker:
     allowed; ticking needs an unlocked week and a passing verification."""
     log = VerificationLog(paths.verifications)
     with tr.locked(paths.tracker_lock):
-        t = tr.load(paths.tracker)
+        t = progress.load_state(paths)
         try:
             item = t.item(item_id)
         except KeyError:
@@ -37,8 +39,8 @@ def check_item(paths: Paths, item_id: str, checked: bool = True) -> tr.Tracker:
             if not log.has_pass(item_id):
                 raise CheckRefused(f"{item_id}: no passing record in progress/verifications.jsonl")
         if item.checked != checked:
-            t.set_checked(item_id, checked)
-            tr.write_atomic(paths.tracker, t.serialize())
+            item.checked = checked
+            progress.write_checked(paths, {i.id for i in t.items() if i.checked})
     return t
 
 
@@ -97,9 +99,11 @@ def router(paths: Paths) -> APIRouter:
     @r.get("")
     def get_tracker():
         try:
-            return tracker_json(tr.load(paths.tracker), log, paths)
+            return tracker_json(progress.load_state(paths), log, paths)
         except tr.TrackerError as e:
             return parse_error(e)
+        except progress.ProgressError as e:
+            return JSONResponse({"detail": str(e)}, status_code=422)
 
     @r.post("/check")
     def post_check(body: CheckRequest):
@@ -107,6 +111,8 @@ def router(paths: Paths) -> APIRouter:
             t = check_item(paths, body.item, body.checked)
         except tr.TrackerError as e:
             return parse_error(e)
+        except progress.ProgressError as e:
+            return JSONResponse({"detail": str(e)}, status_code=422)
         except KeyError as e:
             raise HTTPException(404, e.args[0]) from None
         except CheckRefused as e:

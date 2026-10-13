@@ -1,6 +1,7 @@
 # 12-Week Interactive Python Mastery Curriculum
 
-Source of truth for curriculum state. Read at the start of every session.
+The curriculum: weeks, tasks and items. A learner's ticks are kept in `progress/checked.json`,
+not in this file (`epochzero-tutor status` shows both together).
 
 ## Rules
 - Item IDs (`[W1.1.a]`) are stable. Never renumber or reword an ID.

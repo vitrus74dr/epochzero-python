@@ -81,7 +81,7 @@ def test_verify_task_then_checkoff(paths, tutor):
 
     code, out = tutor("checkoff", "W1.3.c")
     assert code == 0 and "ticked: W1.3.c" in out
-    assert "- [x] [W1.3.c]" in paths.tracker.read_text()
+    assert "W1.3.c" in paths.checked.read_text() and "- [x]" not in paths.tracker.read_text()
 
 
 def test_verify_fail_blocks_checkoff(paths, tutor):
@@ -90,7 +90,7 @@ def test_verify_fail_blocks_checkoff(paths, tutor):
     assert code == 1 and "RESULT: FAIL" in out
     code, out = tutor("checkoff", "W1.3.c")
     assert code == 1 and "refused: W1.3.c: no passing record" in out
-    assert "- [ ] [W1.3.c]" in paths.tracker.read_text()
+    assert not paths.checked.exists()
 
 
 def test_verify_needs_a_folder(paths, tutor):

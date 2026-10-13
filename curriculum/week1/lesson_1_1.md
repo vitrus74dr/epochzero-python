@@ -10,12 +10,14 @@ Python 3.12, with pytest available for tests. Open the cockpit terminal
 (workbench ▸ shell; it starts in `workspace/`) and run:
 
 ```sh
-uv init --bare --python 3.12
+uv init --bare --no-workspace --python 3.12
 uv add --dev pytest
 uv run python --version
 ```
 
 - `uv init --bare` writes a `pyproject.toml` that describes the project.
+  `--no-workspace` keeps it separate from PYGRID's own project in the folder above. Without
+  it, uv would join the two, and your packages would be installed into the cockpit itself.
 - `uv add --dev pytest` installs pytest into the project's own environment, not
   into your system Python.
 - The last line should print `Python 3.12.x`.

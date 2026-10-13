@@ -12,6 +12,11 @@ source of truth for learner progress; never renumber or reword its item IDs.
 - `uv run pygrid --rebuild` rebuilds the UI first
 - Dev: `uv run pygrid --dev` (API only) + `pnpm -C web dev` (UI on :5173, proxies /api)
 - Tests: `capped -m 8G -- uv run pytest -q`; UI typecheck + build: `pnpm -C web build`
+- Content checks: `tools/check_all.sh` (app tests, UI build, every lesson snippet run in a
+  learner env with Arcade headless, stub tests fail cleanly, platformer levels reachable).
+  `tools/learner_env.sh` creates `.learner-env/` with the course's libraries; the parts run
+  separately too (`tools/check_md.py`, `tools/check_stubs.sh`, `tools/check_levels.py`).
+  Run it after any change under `curriculum/`.
 - Terminal quiz: `uv run pygrid-quiz <quiz id>` (needs a real TTY; the cockpit runs it in its pty)
 - Tutor CLI: `uv run pygrid-tutor status|verify|record|checkoff|quiz-add|quiz-results`; the
   slash commands in `workspace/.claude/commands/` call it via the `bin/` shim

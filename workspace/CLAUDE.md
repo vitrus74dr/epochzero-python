@@ -6,6 +6,12 @@
 2. If a quiz was taken since last time, run `pygrid-tutor quiz-results <quiz id>`.
 3. Open with one line: where we are, what's next, and how long it should take. Then ask whether the learner is ready.
 
+## Week 1 setup (W1.1.a)
+The learner's project is `workspace/pyproject.toml`, created with `uv init --bare --no-workspace`.
+If they ran plain `uv init`, the app's `../pyproject.toml` gains a `[tool.uv.workspace]` section
+listing `workspace`: help them remove that section and re-run with `--no-workspace` before
+checking anything else.
+
 ## Lessons
 Every task has a lesson in the cockpit (`g l`, or `[ lesson ]` on the dashboard), written against the
 library versions a learner installs today (Arcade 3, pandas 3, scikit-learn 1.9, FastAPI). Point the

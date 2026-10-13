@@ -121,3 +121,10 @@ def test_write_atomic_leaves_no_temp_files(tmp_path):
     tr.write_atomic(p, MINI)
     assert p.read_text(encoding="utf-8") == MINI
     assert [f.name for f in tmp_path.iterdir()] == ["CURRICULUM_TRACKER.md"]
+
+
+def test_app_project_has_no_uv_workspace():
+    """workspace/ (the learner's uv project) must stay separate from the app's.
+    A plain `uv init` inside it adds [tool.uv.workspace] here; see README."""
+    pyproject = (REAL.parent / "pyproject.toml").read_text()
+    assert "[tool.uv.workspace]" not in pyproject

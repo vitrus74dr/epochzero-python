@@ -4,3 +4,15 @@ __pycache__/
 .pytest_cache/
 web/node_modules/
 web/dist/
+
+# Learner state: progress and the learner's own code stay out of the app repo.
+# (Ticks in CURRICULUM_TRACKER.md still show as changes: it's tracked, being
+# both the curriculum and the progress record.)
+/progress/
+/workspace/*
+!/workspace/CLAUDE.md
+!/workspace/.claude/
+
+# Content-check tooling (tools/)
+/.learner-env/
+/tools/.out/

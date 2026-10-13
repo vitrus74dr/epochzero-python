@@ -32,7 +32,10 @@ Open the cockpit's terminal (workbench ▸ shell) and run `claude` there. It sta
 terminal puts on PATH; every change to the tracker or `progress/` goes through it and
 through the same gates as the app. Outside the cockpit, add `<pygrid>/bin` to your PATH.
 
-Week 1 starts with a uv project in `workspace/` (`uv init --bare`, `uv add --dev pytest`).
+Week 1 starts with a uv project in `workspace/` (`uv init --bare --no-workspace`, then
+`uv add --dev pytest`). `--no-workspace` matters: `workspace/` is inside this repo, and a plain
+`uv init` there would make it a member of the app's project, editing its `pyproject.toml`
+and installing the learner's packages into the app's environment.
 Tests run in that project, so they don't depend on whichever `python3` is on PATH.
 
 ## Security

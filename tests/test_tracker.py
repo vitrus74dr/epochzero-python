@@ -57,7 +57,7 @@ def test_tick_then_untick_restores_bytes():
 
 def test_structure_of_real_tracker():
     t = tr.load(REAL)
-    assert [w.n for w in t.weeks] == list(range(1, 9))
+    assert [w.n for w in t.weeks] == list(range(1, 13))
     assert t.weeks[0].title == "Foundations & Interactive CLI"
     assert t.weeks[0].focus.startswith("variables")
     assert "`=` vs `==`" in t.weeks[0].pitfalls
@@ -65,6 +65,16 @@ def test_structure_of_real_tracker():
     assert kinds["1.2"] == "QUIZ" and kinds["1.3"] == "PROJECT" and kinds["1.1"] is None
     assert [i.id for i in t.completion] == ["W8.Z.a"]
     assert len(list(t.items())) == len({i.id for i in t.items()})
+    assert kinds["12.2"] == "PROJECT" and t.weeks[11].title == "Capstone: Pac-Man"
+
+
+def test_published_items_never_change():
+    """IDs are stable (CLAUDE.md): items may be added, but every item ever
+    published keeps its ID and wording. Append new ones to the fixture."""
+    published = (Path(__file__).parent / "fixtures/tracker_items.txt").read_text().splitlines()
+    current = {f"[{i.id}] {i.text}" for i in tr.load(REAL).items()}
+    missing = [line for line in published if line not in current]
+    assert missing == [], f"renumbered or reworded: {missing}"
 
 
 def test_parse_mini():

@@ -29,10 +29,11 @@ def test_week_lessons(client, with_curriculum):
     assert by_task["1.2"]["kind"] == "QUIZ"
 
 
-def test_later_weeks_have_no_lessons_yet(client, with_curriculum):
+def test_missing_lessons_are_null(client):
+    """No curriculum/ at all: every task is listed, with markdown null."""
     data = client.get("/api/lessons/2").json()
     assert not data["unlocked"]
-    assert all(l["markdown"] is None for l in data["lessons"])
+    assert data["lessons"] and all(l["markdown"] is None for l in data["lessons"])
     assert client.get("/api/lessons/99").status_code == 404
 
 
@@ -65,36 +66,65 @@ def test_scaffold_refusals(with_curriculum, capsys):
     assert "locked" in capsys.readouterr().out
 
 
-# ── the shipped Week 1 content ──
+# ── the shipped curriculum ──
 
-def test_week1_quiz_is_valid_and_graded():
+TRACKER = tr.load(REPO / "CURRICULUM_TRACKER.md")
+WEEKS_WITH_CONTENT = sorted(int(d.name[4:]) for d in CURRICULUM.glob("week*") if d.is_dir())
+STUB_DIRS = sorted(CURRICULUM.glob("week*/stubs/t*"))
+
+
+def test_quizzes_are_valid():
     found, errors = quizzes.load_all(CURRICULUM)
     assert errors == []
-    quiz = found["W1.2.quiz"]
-    assert len(quiz.questions) == 5 and quiz.pass_mark == 4
-    item = quizzes.item_for(quiz, tr.load(REPO / "CURRICULUM_TRACKER.md"))
-    assert item is not None and item.id == "W1.2.b"
+    for quiz in found.values():
+        item = quizzes.item_for(quiz, TRACKER)
+        assert item is not None, f"{quiz.id} verifies nothing"
+        assert len(quiz.questions) == 5 and quiz.pass_mark == 4, quiz.id
 
 
-def test_every_week1_task_has_a_lesson():
-    t = tr.load(REPO / "CURRICULUM_TRACKER.md")
-    for task in t.weeks[0].tasks:
-        assert lessons.lesson_path(Paths(REPO), task.id).is_file(), task.id
+@pytest.mark.parametrize("week", WEEKS_WITH_CONTENT)
+def test_every_task_has_a_lesson_and_quiz(week):
+    found, _ = quizzes.load_all(CURRICULUM)
+    w = next(w for w in TRACKER.weeks if w.n == week)
+    for task in w.tasks:
+        assert lessons.lesson_path(Paths(REPO), task.id).is_file(), f"lesson for {task.id}"
+        if any(i.text.startswith("Quiz:") for i in task.items):
+            assert f"W{task.id}.quiz" in found, f"quiz for {task.id}"
 
 
-@pytest.mark.parametrize("task,count", [("1.1", 5), ("1.3", 15)])
-def test_stub_tests_fail_cleanly_until_implemented(with_curriculum, monkeypatch, task, count):
+def third_party_imports(folder: Path) -> set[str]:
+    import ast
+    local = {p.stem for p in folder.glob("*.py")}
+    names = set()
+    for f in folder.glob("*.py"):
+        for node in ast.walk(ast.parse(f.read_text())):
+            if isinstance(node, ast.Import):
+                names |= {a.name.split(".")[0] for a in node.names}
+            elif isinstance(node, ast.ImportFrom) and node.module and not node.level:
+                names.add(node.module.split(".")[0])
+    return {n for n in names - local if n not in sys.stdlib_module_names and n != "pytest"}
+
+
+@pytest.mark.parametrize("stub", STUB_DIRS, ids=lambda p: f"{p.parent.parent.name}/{p.name}")
+def test_stub_tests_fail_cleanly_until_implemented(paths, monkeypatch, stub):
     """Stubs are valid Python and the tests import them: every test fails
     (not errors) until the learner writes the code."""
+    import importlib.util
+    missing = [m for m in third_party_imports(stub) if importlib.util.find_spec(m) is None]
+    if missing:
+        pytest.skip(f"needs {', '.join(sorted(missing))} (checked in the learner env instead)")
+    shutil.copytree(CURRICULUM, paths.curriculum)
     monkeypatch.setattr(tests_runner, "learner_python", lambda ws, start: [sys.executable])
-    dest, _, _ = lessons.scaffold(with_curriculum, task)
+    task = stub.name[1:].split("-")[0]
+    dest, _, _ = lessons.scaffold(paths, task)
 
     async def run():
-        rel = dest.relative_to(with_curriculum.workspace).as_posix()
-        return [e async for e in tests_runner.run_pytest(with_curriculum, rel, [])][-1]
+        rel = dest.relative_to(paths.workspace).as_posix()
+        return [e async for e in tests_runner.run_pytest(paths, rel, [])][-1]
 
     result = asyncio.run(run())
-    assert result["counts"] == {"passed": 0, "failed": count, "error": 0, "skipped": 0}, result["summary"]
+    c = result["counts"]
+    assert c["failed"] > 0 and c["passed"] == 0 and c["error"] == 0, result["summary"]
 
 
 def test_lesson_add(paths, capsys):

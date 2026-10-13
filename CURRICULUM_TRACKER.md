@@ -1,4 +1,4 @@
-# 8-Week Interactive Python Mastery Curriculum
+# 12-Week Interactive Python Mastery Curriculum
 
 Source of truth for curriculum state. Read at the start of every session.
 
@@ -72,6 +72,13 @@ Pitfalls monitored: forgetting `self`, class vs instance attributes, mutable cla
 - [ ] [W3.3.e] Verification: `test_flashcards.py` covers promotion, demotion, due-date logic, and persistence
 - [ ] [W3.3.f] `walkthrough.md` written
 
+### Task 3.4: Desktop App: Habit Tracker (Tkinter) [PROJECT]
+- [ ] [W3.4.a] `/grill-me` held and `implementation_plan.md` approved
+- [ ] [W3.4.b] Tkinter window: add and remove habits, mark one done today, show each streak; the model classes know nothing about Tkinter
+- [ ] [W3.4.c] Habits save to and load from JSON; streak logic takes `today` as a parameter
+- [ ] [W3.4.d] Verification: pytest covers the model (streaks, gaps, persistence) without opening a window
+- [ ] [W3.4.e] `walkthrough.md` written
+
 ---
 
 ## Week 4: File I/O, APIs, and Error Handling
@@ -91,6 +98,16 @@ Pitfalls monitored: unclosed files (use `with`), bare `except:`, missing request
 - [ ] [W4.3.d] Handle `ConnectionError` and `Timeout` specifically, with a friendly retry or quit
 - [ ] [W4.3.e] Verification: pytest mocks the HTTP layer (success, bad response_code, connection error, timeout)
 - [ ] [W4.3.f] `walkthrough.md` written
+
+### Task 4.4: Automation: File Organizer & Log Analyzer
+- [ ] [W4.4.a] `organize.py`: an `argparse` CLI that sorts a folder's files into subfolders by type with `pathlib`, with `--dry-run` and safe handling of name clashes
+- [ ] [W4.4.b] `logstats.py`: parse a log file with `re` and print a summary (count per level, most common errors, busiest hour)
+- [ ] [W4.4.c] Verification: pytest uses `tmp_path` to cover sorting, clashes, dry-run, and log parsing
+
+### Task 4.5: Data App: CSV Report with pandas
+- [ ] [W4.5.a] Load a CSV with `pandas`; clean it (column types, missing values, duplicates) in a function that returns a new DataFrame
+- [ ] [W4.5.b] Group and aggregate into a summary table, and save at least two `matplotlib` charts to PNG files (no `plt.show()` in the report path)
+- [ ] [W4.5.c] Verification: pytest checks the cleaning and aggregation functions on a small DataFrame built inside the test
 
 ---
 
@@ -166,6 +183,95 @@ Focus: preprocessing, `ColumnTransformer`, `Pipeline`, tuning.
 - [ ] [W8.3.c] `GridSearchCV` over the pipeline (e.g. `ridge__alpha`), fit on training data only
 - [ ] [W8.3.d] Verification: the script runs end-to-end, and held-out R² is positive and beats a `DummyRegressor` baseline
 - [ ] [W8.3.e] `walkthrough.md` written
+
+### Task 8.4: Web App: Prediction Service (FastAPI + SQLite) [PROJECT]
+- [ ] [W8.4.a] `/grill-me` held and `implementation_plan.md` approved
+- [ ] [W8.4.b] FastAPI app serving the saved Week 8 model: an HTML form page and a `POST /api/predict` JSON endpoint with a Pydantic request model
+- [ ] [W8.4.c] Every prediction is stored in SQLite with parameterized queries (`?` placeholders, never f-strings); a history page lists the latest ones
+- [ ] [W8.4.d] Verification: pytest uses FastAPI's `TestClient` to cover the form, the API (including invalid input → 422) and the database
+- [ ] [W8.4.e] `walkthrough.md` written
+
+---
+
+## Week 9: Arcade Classics I: Pong & Breakout
+Focus: the game loop, velocity, collisions, game states.
+Pitfalls monitored: movement not scaled by `delta_time`; a fast ball tunnelling through a paddle; removing sprites from a `SpriteList` while iterating over it.
+
+### Task 9.1: Pong
+- [ ] [W9.1.a] Pure `physics.py`: ball motion scaled by `delta_time`, wall bounces, and a paddle bounce whose angle depends on where the ball hits
+- [ ] [W9.1.b] Arcade game: two paddles (W/S and ↑/↓), a score, a serve after each point, and first to 7 wins
+- [ ] [W9.1.c] Verification: pytest covers movement, bounces, scoring, and serving without opening a window
+
+### Task 9.2: Breakout [PROJECT]
+- [ ] [W9.2.a] `/grill-me` held and `implementation_plan.md` approved
+- [ ] [W9.2.b] Bricks built from a text level layout; paddle, lives, and at least 2 levels; the ball speeds up as bricks fall
+- [ ] [W9.2.c] Game states (title, playing, paused, game over) as a class whose transitions are tested
+- [ ] [W9.2.d] Verification: pytest covers which side of a brick was hit, brick removal, and level progression
+- [ ] [W9.2.e] `walkthrough.md` written
+
+### Task 9.3: Game Loops & Collisions [QUIZ]
+- [ ] [W9.3.a] Quiz: 5 questions on `delta_time`, collision detection, and game states, with a score ≥ 4/5
+
+---
+
+## Week 10: Arcade Classics II: Snake & Tetris
+Focus: grid games, fixed-tick updates, 2D lists, rotation.
+Pitfalls monitored: mixing up (x, y) and (row, col); `[[0] * w] * h` aliasing every row; reversing into yourself within one tick.
+
+### Task 10.1: Snake
+- [ ] [W10.1.a] Pure grid model: the body as a `deque`, queued turns with no 180° reversal, growth, and wall and self collisions
+- [ ] [W10.1.b] Arcade front end on a fixed tick independent of frame rate; food never spawns on the snake (the random generator is injected); the high score is saved to JSON
+- [ ] [W10.1.c] Verification: pytest covers movement, turning rules, growth, collisions, and food placement
+
+### Task 10.2: Tetris [PROJECT]
+- [ ] [W10.2.a] `/grill-me` held and `implementation_plan.md` approved
+- [ ] [W10.2.b] Board and tetromino model: movement, rotation with simple wall kicks, collision, locking, and line clearing with scoring
+- [ ] [W10.2.c] A 7-bag randomizer with an injected random generator; gravity speeds up per level; hard drop and a next-piece preview
+- [ ] [W10.2.d] Verification: pytest covers rotation, kicks, single and multiple line clears, and game over
+- [ ] [W10.2.e] `walkthrough.md` written
+
+---
+
+## Week 11: Arcade Classics III: Space Invaders & Asteroids
+Focus: sprite lists, spawning and removal, vectors, screen wrap.
+Pitfalls monitored: degrees vs radians; bullet lists that grow forever; removing sprites while iterating.
+
+### Task 11.1: Space Invaders
+- [ ] [W11.1.a] Pure formation logic: the march, the step down at an edge, and speeding up as invaders die
+- [ ] [W11.1.b] Arcade game: player cannon with one bullet on screen at a time, invader bombs, shields that wear away, and waves
+- [ ] [W11.1.c] Verification: pytest covers the march, edge turns, speed-up, and wave reset
+
+### Task 11.2: Asteroids [PROJECT]
+- [ ] [W11.2.a] `/grill-me` held and `implementation_plan.md` approved
+- [ ] [W11.2.b] Ship with rotation, thrust, and inertia using vector maths (`math.cos`/`math.sin` in radians), with wrap-around at the screen edges
+- [ ] [W11.2.c] Asteroids split large → medium → small; bullets expire; lives, and a short invulnerability after respawning
+- [ ] [W11.2.d] Verification: pytest covers vector motion, wrap-around, splitting, and bullet lifetime
+- [ ] [W11.2.e] `walkthrough.md` written
+
+### Task 11.3: Vectors & Sprite Lists [QUIZ]
+- [ ] [W11.3.a] Quiz: 5 questions on vectors, angles, and sprite-list management, with a score ≥ 4/5
+
+---
+
+## Week 12: Capstone: Pac-Man
+Focus: tile maps, pathfinding, state machines, game AI.
+Pitfalls monitored: off-by-one between tile and pixel coordinates; turning when not centred on a tile; ghosts reversing through each other's logic.
+
+### Task 12.1: The Maze & Pac-Man
+- [ ] [W12.1.a] Load the maze from a text map: walls, pellets, power pellets, the ghost house, and the side tunnel; convert between tile and pixel coordinates
+- [ ] [W12.1.b] Pac-Man moves tile to tile with a buffered next turn, eats pellets for points, and wraps through the tunnel
+- [ ] [W12.1.c] Verification: pytest covers map loading, coordinate conversion, buffered turns, and pellet eating
+
+### Task 12.2: Ghosts [PROJECT]
+- [ ] [W12.2.a] `/grill-me` held and `implementation_plan.md` approved
+- [ ] [W12.2.b] Breadth-first search over the maze, and the four ghost targeting rules (Blinky, Pinky, Inky, Clyde)
+- [ ] [W12.2.c] Ghost modes as a state machine: scatter/chase timers, frightened after a power pellet, eaten → return to the house
+- [ ] [W12.2.d] Verification: pytest covers shortest paths, each ghost's target tile, and mode transitions
+- [ ] [W12.2.e] `walkthrough.md` written
+
+### Task 12.3: Ship It
+- [ ] [W12.3.a] Lives, levels that speed up, fruit bonus, and a saved high score; the game starts with one `uv run` command
+- [ ] [W12.3.b] Playtest with the tutor: demo a full game in the cockpit, then fix the bugs you found together
 
 ---
 

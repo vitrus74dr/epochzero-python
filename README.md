@@ -1,6 +1,7 @@
 # PYGRID
 
-A local-first cockpit for an 8-week Python curriculum. Claude Code is the tutor in
+A local-first cockpit for a 12-week Python curriculum: foundations, OOP, files and APIs,
+real applications, Arcade games (through Pac-Man) and scikit-learn. Claude Code is the tutor in
 your terminal; the browser app holds the tracker, lessons, editor, terminal and quizzes.
 
 ```sh

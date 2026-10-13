@@ -18,7 +18,7 @@ def verify(paths, item, passed=True):
 
 def test_get_tracker(client):
     data = client.get("/api/tracker").json()
-    assert len(data["weeks"]) == 8
+    assert len(data["weeks"]) == 12
     assert data["weeks"][0]["unlocked"] and not data["weeks"][1]["unlocked"]
     assert data["weeks"][0]["total"] == 9 and data["weeks"][0]["done"] == 0
     assert data["current"]["item"]["id"] == "W1.1.a"

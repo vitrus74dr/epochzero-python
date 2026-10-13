@@ -64,6 +64,7 @@ TypeError: can only concatenate str (not "int") to str
 meant text or arithmetic, so it refuses. Ask Python what you've got with `type()`:
 
 ```python
+>>> age = "36"          # what input() gave back
 >>> type(age)
 <class 'str'>
 >>> type(int(age))

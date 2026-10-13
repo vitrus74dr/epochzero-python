@@ -1,0 +1,42 @@
+{
+  "id": "W2.2.quiz",
+  "title": "Mutability, is vs ==, and mutable defaults",
+  "pass_mark": 4,
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "What does this print?\n\n```python\na = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)\n```",
+      "choices": ["`[1, 2, 3]`", "`[1, 2, 3, 4]`", "`[4]`", "An error"],
+      "answer": 1,
+      "explain": "`b = a` makes a second name for the same list, so appending through `b` changes what `a` sees."
+    },
+    {
+      "id": "q2",
+      "prompt": "What does this print?\n\n```python\nx = [1, 2]\ny = [1, 2]\nprint(x == y, x is y)\n```",
+      "choices": ["`True True`", "`True False`", "`False False`", "`False True`"],
+      "answer": 1,
+      "explain": "Two separate lists with equal contents: `==` compares values (equal), `is` asks if they're the same object (they aren't)."
+    },
+    {
+      "id": "q3",
+      "prompt": "What does the second call print?\n\n```python\ndef add(item, items=[]):\n    items.append(item)\n    return items\n\nprint(add(\"a\"))\nprint(add(\"b\"))\n```",
+      "choices": ["`['b']`", "`['a', 'b']`", "`['a']`", "An error"],
+      "answer": 1,
+      "explain": "The default list is created once, when `def` runs, and shared by every call. Use `items=None` and create the list inside."
+    },
+    {
+      "id": "q4",
+      "prompt": "Which of these types is **immutable**?",
+      "choices": ["`list`", "`dict`", "`tuple`", "`set`"],
+      "answer": 2,
+      "explain": "A tuple can't change after it's made. Lists, dicts and sets can all be changed in place."
+    },
+    {
+      "id": "q5",
+      "prompt": "What does this print?\n\n```python\ngrid = [[0, 0]] * 2\ngrid[0][0] = 9\nprint(grid)\n```",
+      "choices": ["`[[9, 0], [0, 0]]`", "`[[9, 0], [9, 0]]`", "`[[9, 9], [0, 0]]`", "An error"],
+      "answer": 1,
+      "explain": "`* 2` copies the *reference*, so both rows are the same inner list. Build rows separately: `[[0, 0] for _ in range(2)]`."
+    }
+  ]
+}

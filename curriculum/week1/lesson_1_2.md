@@ -50,7 +50,7 @@ So `name = typed or "stranger"` is a common way to give a default.
 `if` doesn't need a boolean. It asks whether a value is *truthy*. These are
 **falsy**; everything else is truthy:
 
-```python
+```python fragment
 False   None   0   0.0   ""   []   {}   ()   set()
 ```
 
@@ -83,7 +83,7 @@ else:
 
 The classic logic bug:
 
-```python
+```python fragment
 if answer == "y" or "yes":    # always true!
 ```
 

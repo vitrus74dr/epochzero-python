@@ -1,0 +1,42 @@
+{
+  "id": "W3.2.quiz",
+  "title": "Classes, inheritance and polymorphism",
+  "pass_mark": 4,
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "What does this print?\n\n```python\nclass Animal:\n    def speak(self):\n        return \"...\"\n    def hello(self):\n        return \"I say \" + self.speak()\n\nclass Dog(Animal):\n    def speak(self):\n        return \"Woof\"\n\nprint(Dog().hello())\n```",
+      "choices": ["`I say ...`", "`I say Woof`", "`Woof`", "An `AttributeError`"],
+      "answer": 1,
+      "explain": "`hello` is inherited, but `self.speak()` looks up `speak` on the actual object, a `Dog`. That's polymorphism."
+    },
+    {
+      "id": "q2",
+      "prompt": "What does this print?\n\n```python\nclass Team:\n    members = []\n    def join(self, name):\n        self.members.append(name)\n\na = Team()\nb = Team()\na.join(\"Ada\")\nprint(b.members)\n```",
+      "choices": ["`[]`", "`['Ada']`", "`None`", "An `AttributeError`"],
+      "answer": 1,
+      "explain": "`members` is a class attribute: one list shared by every `Team`. Create it in `__init__` (`self.members = []`) to give each team its own."
+    },
+    {
+      "id": "q3",
+      "prompt": "`Child` overrides `__init__` but never calls `super().__init__()`. What happens when you create a `Child`?",
+      "choices": ["Python calls the parent's `__init__` automatically", "The parent's `__init__` doesn't run, so attributes it sets are missing", "A `SyntaxError`", "A `TypeError` at once"],
+      "answer": 1,
+      "explain": "Overriding replaces the parent's method entirely. Its setup only runs if you call it with `super().__init__(...)`; otherwise you get an `AttributeError` later, when something reads a missing attribute."
+    },
+    {
+      "id": "q4",
+      "prompt": "What does this print?\n\n```python\nclass Point:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\n    def __repr__(self):\n        return f\"Point({self.x}, {self.y})\"\n\nprint([Point(1, 2)])\n```",
+      "choices": ["`[<__main__.Point object at 0x...>]`", "`[Point(1, 2)]`", "`[(1, 2)]`", "`Point(1, 2)`"],
+      "answer": 1,
+      "explain": "Containers show their items with `repr()`, so the list prints `Point(1, 2)` inside its brackets."
+    },
+    {
+      "id": "q5",
+      "prompt": "Which relationship should use **inheritance** rather than an attribute (composition)?",
+      "choices": ["A `Car` and its `Engine`", "A `Library` and its `Book`s", "A `Square` and a `Rectangle`", "A `Player` and their `Inventory`"],
+      "answer": 2,
+      "explain": "Inheritance means \"is a\": a square is a rectangle. A car *has an* engine, and a library *has* books, so those are attributes."
+    }
+  ]
+}

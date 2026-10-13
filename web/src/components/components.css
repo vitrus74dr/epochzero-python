@@ -1,0 +1,87 @@
+/* ── Panel ─────────────────────────────────────────────── */
+/* Chamfered top-right corner. The outer layer is the 1px border; the inner
+   layer's cut is shrunk by (sqrt2 - 1)px so the diagonal edge keeps its border. */
+.panel {
+  background: var(--border);
+  padding: 1px;
+  clip-path: polygon(0 0, calc(100% - var(--chamfer)) 0, 100% var(--chamfer), 100% 100%, 0 100%);
+  min-width: 0;
+}
+.panel-inner {
+  background: var(--surface);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  clip-path: polygon(0 0, calc(100% - var(--chamfer) + 0.41px) 0, 100% calc(var(--chamfer) - 0.41px), 100% 100%, 0 100%);
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 4px 12px 0 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.panel-title { color: var(--text); }
+.panel-rule { flex: 1; overflow: hidden; }
+.panel-body { padding: 12px 16px 16px; flex: 1; min-height: 0; }
+
+/* ── Tag ───────────────────────────────────────────────── */
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: pre;
+  padding: 1px 4px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.tag--pass    { color: var(--success); }
+.tag--fail    { color: var(--danger); }
+.tag--locked  { color: var(--text-muted); }
+.tag--quiz    { color: var(--info); }
+.tag--project { color: var(--accent-2); }
+.tag--accent  { color: var(--accent); }
+
+/* ── Progress ──────────────────────────────────────────── */
+.progress { white-space: pre; }
+.progress-on  { color: var(--accent); }
+.progress-off { color: var(--text-muted); }
+
+/* ── Cursor ────────────────────────────────────────────── */
+.cursor {
+  display: inline-block;
+  width: 1ch;
+  height: 1.15em;
+  vertical-align: text-bottom;
+  background: var(--accent);
+  animation: cursor-blink 2s steps(1, end) infinite;
+}
+@keyframes cursor-blink { 50% { opacity: 0; } }
+
+/* ── StatusBar ─────────────────────────────────────────── */
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.statusbar-brand { color: var(--accent); font-weight: 700; letter-spacing: 0.08em; }
+.statusbar-crumbs { overflow: hidden; text-overflow: ellipsis; }
+.statusbar-sep { color: var(--text-muted); }
+.statusbar-spacer { flex: 1; }
+.statusbar-toggle:hover { color: var(--accent); }
+.statusbar-ok { color: var(--success); }
+.statusbar-bad { color: var(--danger); }

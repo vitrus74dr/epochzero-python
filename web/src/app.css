@@ -1,0 +1,17 @@
+.app { display: flex; flex-direction: column; height: 100%; }
+.app-main { flex: 1; overflow: auto; padding: 24px; }
+
+.specimen {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1100px;
+}
+.specimen .span-2 { grid-column: span 2; }
+.specimen p { margin: 0 0 8px; }
+
+@media (max-width: 720px) {
+  .app-main { padding: 16px; }
+  .specimen { grid-template-columns: 1fr; }
+  .specimen .span-2 { grid-column: auto; }
+}

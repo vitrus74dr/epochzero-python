@@ -1,0 +1,42 @@
+/* Design tokens. tests/test_contrast.py parses this file and asserts every
+   text/surface pair meets WCAG AA (>= 4.5:1), so keep the format:
+   one `--name: #RRGGBB;` per line inside each theme block. */
+
+:root, :root[data-theme="dark"] {
+  --bg:        #0E1114;  /* deep graphite */
+  --surface:   #151A1F;
+  --surface-2: #1C2329;
+  --border:    #2A323A;
+  --grid:      #1A2026;  /* faint background grid lines */
+  --text:      #C9D1D9;
+  --text-muted:#838B96;
+  --accent:    #5FB3A8;  /* muted teal: primary actions, focus, cursor */
+  --accent-2:  #D4A35A;  /* dim amber: current task, warnings */
+  --success:   #7FB07F;
+  --danger:    #CC7070;
+  --info:      #7A9CC6;
+  --selection: #2B3E3B;
+}
+
+:root[data-theme="light"] {
+  --bg:        #F3F1EC;  /* warm paper */
+  --surface:   #FBFAF7;
+  --surface-2: #ECE9E2;
+  --border:    #D3CFC6;
+  --grid:      #E7E4DD;
+  --text:      #1C2226;
+  --text-muted:#5B6570;
+  --accent:    #2A7368;
+  --accent-2:  #86601F;
+  --success:   #3C743C;
+  --danger:    #A84444;
+  --info:      #3D628F;
+  --selection: #CFE3DF;
+}
+
+:root {
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-prose: 'IBM Plex Sans', system-ui, sans-serif;
+  --chamfer: 8px;
+  --motion: 140ms;
+}

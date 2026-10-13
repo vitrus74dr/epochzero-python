@@ -40,4 +40,4 @@ arrow by arrow.
 
 ## Quiz (W9.3.a)
 
-Five questions; you need 4/5. [Take the quiz](#/quiz/W9.3.quiz), or run `pygrid-quiz W9.3.quiz`.
+Five questions; you need 4/5. [Take the quiz](#/quiz/W9.3.quiz), or run `epochzero-quiz W9.3.quiz`.

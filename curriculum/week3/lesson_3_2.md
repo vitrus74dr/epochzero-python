@@ -112,7 +112,7 @@ for s in sorted(shapes, key=lambda s: s.area()):
 Explain to the tutor where polymorphism happens in that loop.
 
 **W3.2.b (quiz):** five questions on OOP; you need 4/5. [Take the quiz](#/quiz/W3.2.quiz),
-or run `pygrid-quiz W3.2.quiz`.
+or run `epochzero-quiz W3.2.quiz`.
 
 ## Pitfalls
 

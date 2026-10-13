@@ -88,7 +88,7 @@ export default function App() {
     <div className="app">
       <main className={`app-main ${onWorkbench ? 'is-workbench' : ''}`}>
         <header className="topbar">
-          <h1>PYGRID</h1>
+          <h1>EPOCHZERO <span className="brand-sub">PYTHON</span></h1>
           <nav className="nav" aria-label="Views">
             <a href={hrefFor('dashboard')} className={route.view === 'dashboard' ? 'is-on' : ''}
                title="g d">dashboard</a>
@@ -103,10 +103,10 @@ export default function App() {
         </header>
 
         {session === 'expired' && (
-          <p className="banner"><Tag kind="fail">session</Tag> Expired. Open the URL printed by `uv run pygrid`.</p>
+          <p className="banner"><Tag kind="fail">session</Tag> Expired. Open the URL printed by `uv run epochzero`.</p>
         )}
         {session === 'offline' && (
-          <p className="banner"><Tag kind="fail">offline</Tag> Can't reach the PYGRID server.</p>
+          <p className="banner"><Tag kind="fail">offline</Tag> Can't reach the EpochZero Python server.</p>
         )}
         {error && !onWorkbench && (
           <p className="banner" role="alert"><Tag kind="fail">tracker</Tag> {error}</p>

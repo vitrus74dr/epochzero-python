@@ -1,4 +1,4 @@
-"""`pygrid-tutor`: the tutor's (Claude Code's) way to read progress and record checks.
+"""`epochzero-tutor`: the tutor's (Claude Code's) way to read progress and record checks.
 
 The slash commands in workspace/.claude/commands/ call this through Bash, so
 the tutor never edits CURRICULUM_TRACKER.md or progress/ by hand. It uses the
@@ -6,16 +6,16 @@ same code as the app: run_pytest() for /verify, check_item() for /checkoff,
 VerificationLog for tutor/artifact records. The app sees every change live
 through its file watcher.
 
-    pygrid-tutor status
-    pygrid-tutor scaffold W1.3                      # copy the task's starter files/tests
-    pygrid-tutor verify W1.3 [--path week1/t1.3-calculator]   # or one item: W1.3.c
-    pygrid-tutor record W1.1.a --kind tutor --summary "uv venv on 3.12 confirmed"
-    pygrid-tutor record W1.3.a --kind artifact
-    pygrid-tutor checkoff W1.3.c [--undo]
-    pygrid-tutor quiz-check .pygrid/quiz_1_2.json
-    pygrid-tutor quiz-add .pygrid/quiz_1_2.json      # validate, install into curriculum/
-    pygrid-tutor lesson-add 2.1 .pygrid/lesson_2_1.md  # install a new or replacement lesson
-    pygrid-tutor quiz-results W1.2.quiz
+    epochzero-tutor status
+    epochzero-tutor scaffold W1.3                      # copy the task's starter files/tests
+    epochzero-tutor verify W1.3 [--path week1/t1.3-calculator]   # or one item: W1.3.c
+    epochzero-tutor record W1.1.a --kind tutor --summary "uv venv on 3.12 confirmed"
+    epochzero-tutor record W1.3.a --kind artifact
+    epochzero-tutor checkoff W1.3.c [--undo]
+    epochzero-tutor quiz-check .epochzero/quiz_1_2.json
+    epochzero-tutor quiz-add .epochzero/quiz_1_2.json      # validate, install into curriculum/
+    epochzero-tutor lesson-add 2.1 .epochzero/lesson_2_1.md  # install a new or replacement lesson
+    epochzero-tutor quiz-results W1.2.quiz
 
 Claude Code only lets the tutor session touch files inside workspace/, so
 anything outside it (tracker, progress/, curriculum/) goes through here.
@@ -338,7 +338,7 @@ def cmd_quiz_add(paths: Paths, args: argparse.Namespace) -> int:
                                      ensure_ascii=False) + "\n")
     print(f"installed: {dest.relative_to(paths.root).as_posix()} ({quiz.id}, "
           + (f"verifies {item.id})" if item else "practice)"))
-    print(f"learner: quiz view in the cockpit (g q), or `pygrid-quiz {quiz.id}` in its terminal")
+    print(f"learner: quiz view in the cockpit (g q), or `epochzero-quiz {quiz.id}` in its terminal")
     return 0
 
 
@@ -372,10 +372,10 @@ def cmd_quiz_results(paths: Paths, args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="pygrid-tutor", description=__doc__.split("\n\n")[0])
+    parser = argparse.ArgumentParser(prog="epochzero-tutor", description=__doc__.split("\n\n")[0])
     parser.add_argument("--root", type=Path,
-                        default=Path(os.environ.get("PYGRID_ROOT") or ROOT),
-                        help="dir holding CURRICULUM_TRACKER.md (default: $PYGRID_ROOT or the app's)")
+                        default=Path(os.environ.get("EPOCHZERO_ROOT") or ROOT),
+                        help="dir holding CURRICULUM_TRACKER.md (default: $EPOCHZERO_ROOT or the app's)")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("status", help="current item, task folder, recent verifications")
@@ -425,13 +425,13 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return args.fn(paths, args)
     except Usage as e:
-        print(f"pygrid-tutor: {e}", file=sys.stderr)
+        print(f"epochzero-tutor: {e}", file=sys.stderr)
         return 2
     except Refused as e:
         print(f"refused: {e}")
         return 1
     except (tr.TrackerError, FileNotFoundError) as e:
-        print(f"pygrid-tutor: {e}", file=sys.stderr)
+        print(f"epochzero-tutor: {e}", file=sys.stderr)
         return 2
 
 

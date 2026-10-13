@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Dev: run `uv run pygrid --dev` (API on :8765) and `pnpm dev` (UI on :5173).
+// Dev: run `uv run epochzero --dev` (API on :8765) and `pnpm dev` (UI on :5173).
 // changeOrigin stays false so the backend's Host/Origin guard sees :5173.
 export default defineConfig({
   plugins: [react()],

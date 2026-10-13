@@ -5,7 +5,7 @@ rule, and together they feel like they're hunting you as a team. No ghost "think
 all. This lesson is about how simple rules make convincing behaviour, plus the algorithm
 behind every pathfinder in games: **breadth-first search**.
 
-`pygrid-tutor scaffold W12.2` gives `ghosts.py`: BFS, the targeting rules, the mode timer and
+`epochzero-tutor scaffold W12.2` gives `ghosts.py`: BFS, the targeting rules, the mode timer and
 the ghost state machine, as stubs with 13 tests. Fitting them into your game (speeds, the
 house, drawing, collisions) is your design at `/grill-me`.
 

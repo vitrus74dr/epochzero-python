@@ -54,7 +54,7 @@ def test_status_after_login(client):
     login(client)
     r = client.get("/api/status")
     assert r.status_code == 200
-    assert r.json()["app"] == "pygrid"
+    assert r.json()["app"] == "epochzero-python"
 
 
 @pytest.mark.parametrize("host", ["evil.example:8765", "127.0.0.1:9999", "0.0.0.0:8765"])
@@ -100,3 +100,15 @@ def test_websocket_works_with_session(client):
 def test_static_root_is_public(client):
     # The page shell needs no session; it's how the browser gets the token flow.
     assert client.get("/").status_code == 200
+
+
+def test_port_free_detects_a_listener_only():
+    import socket
+    from server.main import port_free
+    with socket.socket() as srv:
+        srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        srv.bind(("127.0.0.1", 0))
+        port = srv.getsockname()[1]
+        srv.listen()
+        assert port_free(port) is False
+    assert port_free(port) is True

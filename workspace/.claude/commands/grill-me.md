@@ -1,11 +1,11 @@
 ---
 description: Architecture interview before a [PROJECT]; writes implementation_plan.md from the learner's answers
 argument-hint: <task, e.g. W1.3>
-allowed-tools: Bash(pygrid-tutor:*), Read, Write
+allowed-tools: Bash(epochzero-tutor:*), Read, Write
 ---
 Run the design interview for project task `$ARGUMENTS` before any code is written.
 
-1. Run `pygrid-tutor status`. The task's items are the acceptance criteria.
+1. Run `epochzero-tutor status`. The task's items are the acceptance criteria.
 2. Ask **4–6 questions, one at a time**, and wait for each answer. Cover:
    - the data model (what values/objects exist, and their types)
    - function or class boundaries (what is pure logic, what does I/O)
@@ -26,7 +26,7 @@ Run the design interview for project task `$ARGUMENTS` before any code is writte
    ## Open questions
    ```
 5. Ask the learner to read it (cockpit dashboard: the task's `[ plan ]` link) and approve it. When
-   they approve: `pygrid-tutor record WN.M.a --kind artifact --summary "plan approved by learner"`,
+   they approve: `epochzero-tutor record WN.M.a --kind artifact --summary "plan approved by learner"`,
    then `/checkoff WN.M.a`.
-6. Next (per CLAUDE.md): `pygrid-tutor scaffold WN.M`, read the starter tests, and add tests for the
+6. Next (per CLAUDE.md): `epochzero-tutor scaffold WN.M`, read the starter tests, and add tests for the
    functions in the plan, before the learner writes any logic.

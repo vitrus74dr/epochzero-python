@@ -2,11 +2,11 @@
 
 One markdown lesson per task: curriculum/weekN/lesson_N_M.md. All twelve
 weeks ship with the app; the tutor can add or replace lessons
-(`pygrid-tutor lesson-add`), and a task without a lesson file is shown as
+(`epochzero-tutor lesson-add`), and a task without a lesson file is shown as
 "no lesson yet", not treated as an error.
 
 Scaffolds: curriculum/weekN/stubs/tN.M-<slug>/ holds starter files (tests
-first, plus signature-only stubs) that `pygrid-tutor scaffold` copies into the
+first, plus signature-only stubs) that `epochzero-tutor scaffold` copies into the
 learner's task folder. The tutor session can't read curriculum/ itself.
 """
 

@@ -90,7 +90,7 @@ routine measurements is a genuinely useful result.
 
 ## 5. The test contract
 
-`pygrid-tutor scaffold W8.3` gives `test_health.py`, which needs one function from `health.py`:
+`epochzero-tutor scaffold W8.3` gives `test_health.py`, which needs one function from `health.py`:
 
 ```python fragment
 def build_search():

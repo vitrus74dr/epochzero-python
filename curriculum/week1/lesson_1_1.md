@@ -16,14 +16,14 @@ uv run python --version
 ```
 
 - `uv init --bare` writes a `pyproject.toml` that describes the project.
-  `--no-workspace` keeps it separate from PYGRID's own project in the folder above. Without
+  `--no-workspace` keeps it separate from EpochZero Python's own project in the folder above. Without
   it, uv would join the two, and your packages would be installed into the cockpit itself.
 - `uv add --dev pytest` installs pytest into the project's own environment, not
   into your system Python.
 - The last line should print `Python 3.12.x`.
 
 Each task gets its own folder, named after the task. This one is `week1/t1.1-hello/`.
-Ask the tutor to set it up (`pygrid-tutor scaffold W1.1` copies in the starter file
+Ask the tutor to set it up (`epochzero-tutor scaffold W1.1` copies in the starter file
 and its tests), then open `hello.py` in the workbench.
 
 ## 2. Talking to the user: `print()` and `input()`

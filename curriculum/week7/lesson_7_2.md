@@ -93,7 +93,7 @@ stays untouched.
 Explain to the tutor why you didn't just pick the settings with the best test score.
 
 **W7.2.b (quiz):** five questions on leakage and train/test discipline; you need 4/5.
-[Take the quiz](#/quiz/W7.2.quiz), or run `pygrid-quiz W7.2.quiz`.
+[Take the quiz](#/quiz/W7.2.quiz), or run `epochzero-quiz W7.2.quiz`.
 
 ## Pitfalls
 

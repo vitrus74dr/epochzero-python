@@ -115,7 +115,7 @@ keep a normal `for` loop.
 **W2.1.a (tutor check):** in a scratch file, `week2/t2.1-lists/practice.py`, show the
 tutor slicing, `append`, a loop with `enumerate`, and one with `zip`.
 
-**W2.1.b (tests):** run `pygrid-tutor scaffold W2.1`. You get:
+**W2.1.b (tests):** run `epochzero-tutor scaffold W2.1`. You get:
 
 - `loops.py`: three working functions written as `for` loops. Don't change it.
 - `comprehensions.py`: the same three functions as stubs. Rewrite each one as a

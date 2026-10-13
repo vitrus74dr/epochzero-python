@@ -42,4 +42,4 @@ Arcade's `sprite.angle` turns **clockwise**. Convert deliberately, every time.
 
 ## Quiz (W11.3.a)
 
-Five questions; you need 4/5. [Take the quiz](#/quiz/W11.3.quiz), or run `pygrid-quiz W11.3.quiz`.
+Five questions; you need 4/5. [Take the quiz](#/quiz/W11.3.quiz), or run `epochzero-quiz W11.3.quiz`.

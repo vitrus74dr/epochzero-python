@@ -168,8 +168,8 @@ def test_quiz_mode_rejects_bad_id(client):
 
 def test_terminal_knows_app_and_data_roots(client, paths):
     from server.paths import ROOT
-    script(paths, "env.py", 'import os\nprint("APP=" + os.environ["PYGRID_APP"])\n'
-                            'print("DATA=" + os.environ["PYGRID_ROOT"])\n')
+    script(paths, "env.py", 'import os\nprint("APP=" + os.environ["EPOCHZERO_APP"])\n'
+                            'print("DATA=" + os.environ["EPOCHZERO_ROOT"])\n')
     with connect(client, mode="run", file="env.py") as ws:
         out, _ = read_until(ws, "DATA=")
         read_more, _ = read_until(ws, "\n")

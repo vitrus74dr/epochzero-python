@@ -1,4 +1,4 @@
-"""PYGRID app factory and launcher.
+"""EpochZero Python: app factory and launcher.
 
 Security model (see HANDOFF.md §7): the server binds 127.0.0.1 only, rejects
 requests whose Host/Origin aren't this app (DNS rebinding, cross-site
@@ -46,7 +46,7 @@ PUBLIC_API = {"/api/session"}
 def cookie_name(port: int) -> str:
     # Cookies aren't port-scoped, so include the port to keep two
     # instances on different ports from clobbering each other.
-    return f"pygrid_session_{port}"
+    return f"epochzero_session_{port}"
 
 
 class GuardMiddleware:
@@ -126,7 +126,7 @@ def create_app(*, token: str, port: int = DEFAULT_PORT, dev: bool = False,
         if task:
             await task
 
-    app = FastAPI(title="PYGRID", docs_url=None, redoc_url=None, openapi_url=None,
+    app = FastAPI(title="EpochZero Python", docs_url=None, redoc_url=None, openapi_url=None,
                   lifespan=lifespan)
     app.state.hub = hub
 
@@ -139,7 +139,7 @@ def create_app(*, token: str, port: int = DEFAULT_PORT, dev: bool = False,
 
     @app.get("/api/status")
     def status() -> dict:
-        return {"app": "pygrid", "version": "0.1.0", "root": str(root)}
+        return {"app": "epochzero-python", "version": "0.1.0", "root": str(root)}
 
     @app.get("/api/events")
     def events() -> StreamingResponse:
@@ -158,7 +158,7 @@ def create_app(*, token: str, port: int = DEFAULT_PORT, dev: bool = False,
     else:
         @app.get("/", response_class=HTMLResponse)
         def no_build() -> str:
-            return ("<pre>PYGRID: web/dist not found. Run `pnpm -C web build`, "
+            return ("<pre>EpochZero Python: web/dist not found. Run `pnpm -C web build`, "
                     "or start the Vite dev server with `pnpm -C web dev`.</pre>")
 
     app.add_middleware(GuardMiddleware, token=token, port=port, dev=dev)
@@ -168,15 +168,18 @@ def create_app(*, token: str, port: int = DEFAULT_PORT, dev: bool = False,
 def build_web() -> None:
     pnpm = shutil.which("pnpm")
     if pnpm is None:
-        sys.exit("PYGRID: web/dist is missing and pnpm is not installed.")
-    print("PYGRID: building web UI (first run)...", flush=True)
+        sys.exit("EpochZero Python: web/dist is missing and pnpm is not installed.")
+    print("EpochZero Python: building web UI (first run)...", flush=True)
     if not (WEB / "node_modules").is_dir():
         subprocess.run([pnpm, "install", "--frozen-lockfile"], cwd=WEB, check=True)
     subprocess.run([pnpm, "build"], cwd=WEB, check=True)
 
 
 def port_free(port: int) -> bool:
+    """True unless something is listening on the port. SO_REUSEADDR, as uvicorn
+    uses, so connections lingering in TIME_WAIT after a restart don't count."""
     with socket.socket() as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             s.bind(("127.0.0.1", port))
         except OSError:
@@ -185,7 +188,7 @@ def port_free(port: int) -> bool:
 
 
 def run() -> None:
-    parser = argparse.ArgumentParser(prog="pygrid")
+    parser = argparse.ArgumentParser(prog="epochzero")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--dev", action="store_true",
                         help="API only; open the Vite dev server (pnpm -C web dev) instead")
@@ -201,7 +204,7 @@ def run() -> None:
     # Check before printing/opening the URL, or the browser lands on whatever
     # already holds the port with a token it doesn't know.
     if not port_free(args.port):
-        sys.exit(f"PYGRID: 127.0.0.1:{args.port} is in use. Is PYGRID already running? "
+        sys.exit(f"EpochZero Python: 127.0.0.1:{args.port} is in use. Is it already running? "
                  "Try --port.")
 
     token = secrets.token_urlsafe(32)
@@ -209,8 +212,8 @@ def run() -> None:
     url = f"http://127.0.0.1:{ui_port}/?token={token}"
     app = create_app(token=token, port=args.port, dev=args.dev, root=args.root.resolve())
 
-    print(f"PYGRID ▸ {url}", flush=True)
-    print("PYGRID ▸ bound to 127.0.0.1 only. Learner code runs as you; it is not sandboxed.",
+    print(f"EpochZero Python ▸ {url}", flush=True)
+    print("EpochZero Python ▸ bound to 127.0.0.1 only. Learner code runs as you; it is not sandboxed.",
           flush=True)
     if not args.no_browser:
         threading.Timer(1.0, webbrowser.open, [url]).start()

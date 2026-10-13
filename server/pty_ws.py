@@ -42,7 +42,7 @@ class SpawnError(Exception):
 
 
 def child_env() -> dict[str, str]:
-    """The user's environment minus PYGRID's own virtualenv, so `python`
+    """The user's environment minus the app's own virtualenv, so `python`
     and `uv` in the terminal see the learner's setup, not the app's."""
     env = dict(os.environ)
     venv = env.pop("VIRTUAL_ENV", None)
@@ -51,17 +51,17 @@ def child_env() -> dict[str, str]:
                                   if p not in app_bins)
     for k in ("PYTHONHOME", "PYTHONPATH", "UV_PROJECT_ENVIRONMENT"):
         env.pop(k, None)
-    env.update(TERM="xterm-256color", COLORTERM="truecolor", PYGRID="1")
+    env.update(TERM="xterm-256color", COLORTERM="truecolor", EPOCHZERO="1")
     return env
 
 
 def terminal_env(paths: Paths) -> dict[str, str]:
     """child_env() plus what `claude` running in this terminal needs: the
-    pygrid-tutor/pygrid-quiz shims on PATH (bin/), the app dir, and the data
+    epochzero-tutor/epochzero-quiz shims on PATH (bin/), the app dir, and the data
     root (tracker, progress/) this server is serving."""
     env = child_env()
     env["PATH"] = os.pathsep.join([str(ROOT / "bin"), env.get("PATH", "")])
-    return env | {"PYGRID_APP": str(ROOT), "PYGRID_ROOT": str(paths.root)}
+    return env | {"EPOCHZERO_APP": str(ROOT), "EPOCHZERO_ROOT": str(paths.root)}
 
 
 def command_for(paths: Paths, mode: str, file: str | None) -> tuple[list[str], Path]:

@@ -10,7 +10,7 @@ function clock(): string {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
-/** tmux-style bar: PYGRID ▸ W1 ▸ T1.2 │ tests 4/5 │ ● dark │ 21:20 */
+/** tmux-style bar: EPOCHZERO ▸ W1 ▸ T1.2 │ tests 4/5 │ ● dark │ 21:20 */
 export function StatusBar({ crumbs, segments = [] }: Props) {
   const [theme, toggle] = useTheme()
   const [now, setNow] = useState(clock)
@@ -22,7 +22,7 @@ export function StatusBar({ crumbs, segments = [] }: Props) {
 
   return (
     <footer className="statusbar">
-      <span className="statusbar-brand">PYGRID</span>
+      <span className="statusbar-brand">EPOCHZERO</span>
       <span className="statusbar-crumbs">
         {crumbs.map((c) => (
           <span key={c}><span className="statusbar-sep"> ▸ </span>{c}</span>

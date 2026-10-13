@@ -1,7 +1,7 @@
 [project]
-name = "pygrid"
+name = "epochzero-python"
 version = "0.1.0"
-description = "Local-first Python curriculum cockpit"
+description = "EpochZero Python: a local-first Python course cockpit with a Claude Code tutor"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.115",
@@ -12,9 +12,9 @@ dependencies = [
 ]
 
 [project.scripts]
-pygrid = "server.main:run"
-pygrid-quiz = "server.quiz_cli:main"
-pygrid-tutor = "server.tutor_cli:main"
+epochzero = "server.main:run"
+epochzero-quiz = "server.quiz_cli:main"
+epochzero-tutor = "server.tutor_cli:main"
 
 [dependency-groups]
 dev = [

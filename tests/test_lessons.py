@@ -129,7 +129,7 @@ def test_stub_tests_fail_cleanly_until_implemented(paths, monkeypatch, stub):
 
 def test_lesson_add(paths, capsys):
     root = ["--root", str(paths.root)]
-    draft = paths.workspace / ".pygrid" / "l.md"
+    draft = paths.workspace / ".epochzero" / "l.md"
     draft.parent.mkdir()
     draft.write_text("no heading\n")
     assert tutor_cli.main([*root, "lesson-add", "1.2", str(draft)]) == 1

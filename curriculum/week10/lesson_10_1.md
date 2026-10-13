@@ -4,7 +4,7 @@ Snake has been on everything from 1970s arcades to old Nokia phones. It's a diff
 of game from Pong: the world is a **grid**, and time moves in **ticks** (the snake jumps
 one whole cell at a time), not smoothly. Those two ideas carry Tetris and Pac-Man.
 
-`pygrid-tutor scaffold W10.1` gives `snake.py` (a `SnakeGame` model, a `Ticker`, and
+`epochzero-tutor scaffold W10.1` gives `snake.py` (a `SnakeGame` model, a `Ticker`, and
 high-score functions, all stubs) and 19 tests. You write the model, then `snake_game.py`
 draws it.
 

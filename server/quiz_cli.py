@@ -1,4 +1,4 @@
-"""Terminal quiz runner: `pygrid-quiz W1.2.quiz` (or `python -m server.quiz_cli`).
+"""Terminal quiz runner: `epochzero-quiz W1.2.quiz` (or `python -m server.quiz_cli`).
 
 The same spec, grading and result file as the browser quiz (server/quizzes.py),
 rendered with rich and answered with inquirer arrow-key prompts. Needs a real
@@ -69,9 +69,9 @@ def report(console: Console, quiz: quizzes.Quiz, attempt: dict) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="pygrid-quiz")
+    parser = argparse.ArgumentParser(prog="epochzero-quiz")
     parser.add_argument("quiz_id", help="e.g. W1.2.quiz")
-    parser.add_argument("--root", type=Path, default=Path(os.environ.get("PYGRID_ROOT") or ROOT))
+    parser.add_argument("--root", type=Path, default=Path(os.environ.get("EPOCHZERO_ROOT") or ROOT))
     args = parser.parse_args(argv)
     paths = Paths(args.root.resolve())
     console = Console(theme=THEME)
@@ -79,10 +79,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         quiz = quizzes.get(paths, args.quiz_id)
     except KeyError as e:
-        console.print(Text(f"pygrid-quiz: {e.args[0]}", style=BAD))
+        console.print(Text(f"epochzero-quiz: {e.args[0]}", style=BAD))
         return 2
     if not sys.stdin.isatty():
-        console.print(Text("pygrid-quiz needs an interactive terminal. "
+        console.print(Text("epochzero-quiz needs an interactive terminal. "
                            "Run it from the cockpit's terminal.", style=BAD))
         return 2
 

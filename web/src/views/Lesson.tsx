@@ -117,7 +117,7 @@ export function LessonView({ taskId, data, onUpdate }: Props) {
           ) : lessons && !error ? (
             <p className="muted">
               No lesson for this task yet. Ask the tutor in Claude Code: it can write one
-              (<code className="inline-code">pygrid-tutor lesson-add</code>).
+              (<code className="inline-code">epochzero-tutor lesson-add</code>).
             </p>
           ) : null}
         </Panel>

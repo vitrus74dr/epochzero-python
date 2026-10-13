@@ -5,7 +5,7 @@ that break apart when shot. There's no friction to speak of in space, so the shi
 moving after you let go of the thrust: **inertia**. It's a game about vectors, and it
 feels completely unlike Pong.
 
-`pygrid-tutor scaffold W11.2` gives `space.py`: headings, thrust, drag, wrap-around,
+`epochzero-tutor scaffold W11.2` gives `space.py`: headings, thrust, drag, wrap-around,
 collisions, splitting and bullets, as stubs plus 17 tests. The game around it is yours,
 designed at `/grill-me`.
 

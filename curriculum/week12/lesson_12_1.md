@@ -5,7 +5,7 @@ circle in a maze, four ghosts with distinct personalities, and the best-selling 
 of all time. This week you build it, and almost everything from the past eleven weeks is in
 it: text maps, grids, ticks, state machines, pathfinding.
 
-`pygrid-tutor scaffold W12.1` gives `maze.txt` (the classic 28×31 layout, with the
+`epochzero-tutor scaffold W12.1` gives `maze.txt` (the classic 28×31 layout, with the
 original's 240 pellets and 4 power pellets), `maze.py` (stubs) and 13 tests.
 
 ## 1. The maze is text

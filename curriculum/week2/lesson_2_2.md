@@ -134,7 +134,7 @@ common, most common first. Hint: `sorted(counts.items(), key=..., reverse=True)`
 look up what `key=` takes. Show the tutor the output and talk through how you used `.get()`.
 
 **W2.2.b (quiz):** five questions on mutability, `is` vs `==` and mutable defaults. You
-need 4/5. Take it in the [quiz view](#/quiz/W2.2.quiz) or with `pygrid-quiz W2.2.quiz`.
+need 4/5. Take it in the [quiz view](#/quiz/W2.2.quiz) or with `epochzero-quiz W2.2.quiz`.
 
 ## Pitfalls
 

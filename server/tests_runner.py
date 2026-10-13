@@ -116,7 +116,7 @@ async def run_pytest(paths: Paths, rel: str, items: list[str],
                      by: str = "app") -> AsyncIterator[dict]:
     ws = paths.workspace.resolve()
     target = resolve_in(ws, rel)
-    with tempfile.TemporaryDirectory(prefix="pygrid-junit-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="epochzero-junit-") as tmp:
         report = Path(tmp) / "report.xml"
         argv, cwd = pytest_argv(paths, target, report)
         yield {"type": "start", "argv": argv, "cwd": cwd.relative_to(ws).as_posix() or ".",

@@ -266,3 +266,5 @@
   .lesson-nav { position: static; }
   .lesson-criteria { position: static; }
 }
+
+.topbar .brand-sub { color: var(--text-muted); font-weight: 400; }

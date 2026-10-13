@@ -1,5 +1,5 @@
 {
   "permissions": {
-    "allow": ["Bash(pygrid-tutor:*)"]
+    "allow": ["Bash(epochzero-tutor:*)"]
   }
 }

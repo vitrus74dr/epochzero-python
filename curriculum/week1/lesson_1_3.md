@@ -24,7 +24,7 @@ How it's worded is up to you; the behaviour isn't.
 1. **Design first.** Run `/grill-me W1.3` with the tutor. You answer 4–6 questions
    about your design, and the tutor writes `implementation_plan.md` from *your*
    answers. Read it via the `[ plan ]` link on the dashboard, then approve it.
-2. **Tests first.** `pygrid-tutor scaffold W1.3` gives you `calculator.py` (just a
+2. **Tests first.** `epochzero-tutor scaffold W1.3` gives you `calculator.py` (just a
    stub) and `test_calculator.py`. The tutor adds tests for the functions in your plan.
 3. **You write the code.** Run the tests often (**Ctrl/Cmd+Shift+Enter**). Red is
    normal while you work.

@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
-    <title>PYGRID</title>
+    <title>EpochZero Python</title>
     <script>
       // Set data-theme before first paint so there is no flash of the wrong theme.
       // Keep the storage key in sync with src/theme/theme.ts.
       (function () {
         var t = null;
-        try { t = localStorage.getItem('pygrid.theme'); } catch (e) {}
+        try { t = localStorage.getItem('epochzero.theme'); } catch (e) {}
         if (t !== 'dark' && t !== 'light') {
           t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         }

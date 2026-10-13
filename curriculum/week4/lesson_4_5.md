@@ -10,7 +10,7 @@ machine learning uses pandas too, so this is the foundation.
 uv add pandas matplotlib
 ```
 
-Run `pygrid-tutor scaffold W4.5` for `report.py` (stubs), `test_report.py` and `sales.csv`.
+Run `epochzero-tutor scaffold W4.5` for `report.py` (stubs), `test_report.py` and `sales.csv`.
 Open `sales.csv` in the workbench first and look for the mess yourself.
 
 > This course uses **pandas 3**. Many tutorials online were written for pandas 1 or 2

@@ -25,7 +25,7 @@ P..CC..###............E.CCC.##....F.
 | `P` | player start (exactly one) |
 | `.` | empty |
 
-Run `pygrid-tutor scaffold W6.3`. You get `levels.py`, whose loader has a fixed
+Run `epochzero-tutor scaffold W6.3`. You get `levels.py`, whose loader has a fixed
 interface (a file format is a contract), plus its tests, and two starter levels. Everything
 else (the game, enemies, states, how levels switch) is yours to design at `/grill-me`.
 

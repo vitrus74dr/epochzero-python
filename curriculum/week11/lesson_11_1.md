@@ -5,7 +5,7 @@ you shoot them. It was so popular that it was blamed (probably unfairly) for a c
 shortage in Japan. This game is about **lots of objects**: dozens of invaders, bullets and
 bombs, and shields that crumble, all being created and destroyed every second.
 
-`pygrid-tutor scaffold W11.1` gives `formation.py`, the invaders' marching logic, as stubs
+`epochzero-tutor scaffold W11.1` gives `formation.py`, the invaders' marching logic, as stubs
 plus 10 tests. Then you build `invaders.py`.
 
 ## 1. The formation is one thing

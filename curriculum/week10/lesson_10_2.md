@@ -4,7 +4,7 @@ Alexey Pajitnov wrote Tetris in Moscow in 1984; it's probably the most-played vi
 ever made. Under the falling blocks is a neat puzzle in grids and geometry: how do you
 *rotate* a shape, what happens when it doesn't fit, and how do whole rows vanish?
 
-`pygrid-tutor scaffold W10.2` gives `tetris.py`: shapes, rotation, the board, kicks,
+`epochzero-tutor scaffold W10.2` gives `tetris.py`: shapes, rotation, the board, kicks,
 scoring and the randomizer, as stubs with a contract and 22 tests. The game loop (gravity,
 controls, lock timing, the preview, game over) is yours, planned at `/grill-me`.
 

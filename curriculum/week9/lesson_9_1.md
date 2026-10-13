@@ -6,7 +6,7 @@ it: a loop that updates and draws, velocity, collisions, and the rules of play.
 
 Arcade Classics weeks follow one pattern: **the rules live in a pure module with no
 Arcade in it**, tested like any other code, and a thin Arcade file draws them and feeds
-them keyboard input. Run `pygrid-tutor scaffold W9.1`. You get `physics.py` (stubs whose
+them keyboard input. Run `epochzero-tutor scaffold W9.1`. You get `physics.py` (stubs whose
 docstrings are the spec) and `test_physics.py`. You write the physics, then `pong.py`.
 
 ## 1. State is data

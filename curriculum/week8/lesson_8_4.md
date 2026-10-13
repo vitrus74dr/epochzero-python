@@ -79,7 +79,7 @@ are needed, so tests are fast.
 
 ## 4. The app factory
 
-`pygrid-tutor scaffold W8.4` gives `app.py` and `test_app.py`. The contract is one function:
+`epochzero-tutor scaffold W8.4` gives `app.py` and `test_app.py`. The contract is one function:
 
 ```python fragment
 def create_app(model, db_path) -> FastAPI:

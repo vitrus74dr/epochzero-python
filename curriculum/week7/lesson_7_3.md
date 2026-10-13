@@ -99,7 +99,7 @@ the biggest off-diagonal count red, so the worst confusion jumps out.
 
 ## 5. The test contract
 
-`pygrid-tutor scaffold W7.3` gives you `test_digits.py`. It needs one function from
+`epochzero-tutor scaffold W7.3` gives you `test_digits.py`. It needs one function from
 `digits.py`:
 
 ```python fragment

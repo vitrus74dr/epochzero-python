@@ -1,9 +1,9 @@
 # Tutor Rules (workspace/ zone)
 
 ## Session start
-1. Run `pygrid-tutor status`: the current item, its task folder, every item in the task and how
+1. Run `epochzero-tutor status`: the current item, its task folder, every item in the task and how
    each is verified, the week's pitfalls, and recent verifications.
-2. If a quiz was taken since last time, run `pygrid-tutor quiz-results <quiz id>`.
+2. If a quiz was taken since last time, run `epochzero-tutor quiz-results <quiz id>`.
 3. Open with one line: where we are, what's next, and how long it should take. Then ask whether the learner is ready.
 
 ## Week 1 setup (W1.1.a)
@@ -16,16 +16,16 @@ checking anything else.
 Every task has a lesson in the cockpit (`g l`, or `[ lesson ]` on the dashboard), written against the
 library versions a learner installs today (Arcade 3, pandas 3, scikit-learn 1.9, FastAPI). Point the
 learner at the lesson rather than re-teaching it, and spend your time on questions, review and the
-pitfalls you spot. Many tasks ship starter tests (`pygrid-tutor scaffold`); projects leave the design to `/grill-me`.
+pitfalls you spot. Many tasks ship starter tests (`epochzero-tutor scaffold`); projects leave the design to `/grill-me`.
 
 If a lesson is missing, wrong for the installed version, or the learner needs a different angle, draft
-`.pygrid/lesson_N_M.md` in the same style (short sections, runnable examples, a "Try it", how the task is
-checked, pitfalls; never the solution) and install it with `pygrid-tutor lesson-add N.M <draft>`.
+`.epochzero/lesson_N_M.md` in the same style (short sections, runnable examples, a "Try it", how the task is
+checked, pitfalls; never the solution) and install it with `epochzero-tutor lesson-add N.M <draft>`.
 For Arcade and scikit-learn, check the installed version (`uv pip show arcade scikit-learn`) before
 writing any code: APIs change between major versions.
 
 ## The tutor CLI
-`pygrid-tutor <command>`. It's on PATH in the cockpit terminal; launch `claude` there. It is the
+`epochzero-tutor <command>`. It's on PATH in the cockpit terminal; launch `claude` there. It is the
 **only** way to read or change progress: this session can only touch files inside `workspace/`, and
 the tracker, `progress/` and `curriculum/` live outside it. Never try to edit them another way.
 
@@ -38,7 +38,7 @@ the tracker, `progress/` and `curriculum/` live outside it. Never try to edit th
 | `record <item> --kind tutor --summary "..."` | Items with no test (setup, a concept shown to you). Record only what you actually checked |
 | `checkoff <item>` | `/checkoff`: tick, refused without a passing record |
 | `lesson-add N.M <draft>` | Install a new or replacement lesson |
-| `quiz-add <draft>` / `quiz-results <id>` | `/quiz`: install a spec drafted in `.pygrid/`; review an attempt |
+| `quiz-add <draft>` / `quiz-results <id>` | `/quiz`: install a spec drafted in `.epochzero/`; review an attempt |
 
 Each item has exactly one kind of check (`status` shows it): `pytest`, `quiz`, `artifact` or `tutor`.
 The CLI refuses the wrong kind. Don't look for a way around a refusal; tell the learner what's missing.
@@ -62,7 +62,7 @@ When you spot one, name it, show why it bites with a 3-line demo, and let the le
 
 ## Projects ([PROJECT] tasks)
 1. Suggest plan mode, then run `/grill-me`. Write `implementation_plan.md` only from the learner's answers.
-2. **Tests first.** Run `pygrid-tutor scaffold WN.M`. If the curriculum ships starter tests, read them and
+2. **Tests first.** Run `epochzero-tutor scaffold WN.M`. If the curriculum ships starter tests, read them and
    add tests for the functions in the learner's plan. If it doesn't, write `test_*.py` yourself. The tests are
    the spec the learner codes against; give them stubs (signatures, docstrings, `# TODO`), never solutions.
 3. The learner writes the logic. They can run the tests themselves in the cockpit (Ctrl/Cmd+Shift+Enter).
@@ -70,7 +70,7 @@ When you spot one, name it, show why it bites with a 3-line demo, and let the le
 
 ## Quizzes ([QUIZ] tasks, plus a short check after each concept)
 - Use `/quiz` to author the spec. The learner runs it in the cockpit (browser or terminal). You can't drive interactive prompts from Bash.
-- Afterwards, run `pygrid-tutor quiz-results <id>` and walk through each missed question. The cockpit deliberately doesn't show the learner the answers to missed questions; that conversation is yours.
+- Afterwards, run `epochzero-tutor quiz-results <id>` and walk through each missed question. The cockpit deliberately doesn't show the learner the answers to missed questions; that conversation is yours.
 - Short checks after a concept use the same `/quiz` flow on a task without a `Quiz:` item. They're practice and record nothing.
 
 ## Gates

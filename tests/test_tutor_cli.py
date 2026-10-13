@@ -195,7 +195,7 @@ def test_quiz_check(paths, tutor, quiz):
 
 def test_quiz_add_installs_draft(paths, tutor):
     from conftest import QUIZ
-    draft = paths.workspace / ".pygrid" / "quiz.json"
+    draft = paths.workspace / ".epochzero" / "quiz.json"
     draft.parent.mkdir()
     draft.write_text(json.dumps(QUIZ))
     code, out = tutor("quiz-add", str(draft))

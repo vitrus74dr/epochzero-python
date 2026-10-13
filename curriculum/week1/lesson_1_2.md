@@ -133,7 +133,7 @@ Show it to the tutor when it runs. This item is a tutor check.
 ## 7. Quiz (W1.2.b)
 
 Five questions on boolean logic and truthiness; you need **4/5**. Take it in the
-[quiz view](#/quiz/W1.2.quiz) (keys `1`–`4`, then `Enter`), or run `pygrid-quiz W1.2.quiz`
+[quiz view](#/quiz/W1.2.quiz) (keys `1`–`4`, then `Enter`), or run `epochzero-quiz W1.2.quiz`
 in the cockpit terminal. Missed questions aren't explained on screen: talk them
 through with the tutor, then retake.
 

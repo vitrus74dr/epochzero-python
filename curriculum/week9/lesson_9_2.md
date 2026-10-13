@@ -4,7 +4,7 @@ Atari, 1976: Pong turned on its side, with a wall of bricks to smash. It adds th
 to Pong: collision with **many** objects (and knowing which *side* you hit), **levels**,
 and **game states**: title screen, playing, paused, game over.
 
-`pygrid-tutor scaffold W9.2` gives `bricks.py`: the collision maths and brick bookkeeping,
+`epochzero-tutor scaffold W9.2` gives `bricks.py`: the collision maths and brick bookkeeping,
 as stubs with a contract and tests. The rest is your design at `/grill-me`.
 
 ## 1. Bricks from a layout

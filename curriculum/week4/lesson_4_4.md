@@ -6,7 +6,7 @@ say), and one reads a log file and tells you what went wrong. New tools: `argpar
 for command-line options, `pathlib` for walking folders, `re` for pattern matching,
 and `collections.Counter`.
 
-Start with `pygrid-tutor scaffold W4.4`. You get `organize.py` and `logstats.py`, each a
+Start with `epochzero-tutor scaffold W4.4`. You get `organize.py` and `logstats.py`, each a
 set of stubs with docstrings saying exactly what they must do, plus the tests. This is
 a **guided** task: the design is given and the code is yours.
 

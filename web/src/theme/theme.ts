@@ -3,7 +3,7 @@
 
 export type Theme = 'dark' | 'light'
 
-const STORAGE_KEY = 'pygrid.theme'
+const STORAGE_KEY = 'epochzero.theme'
 const listeners = new Set<(t: Theme) => void>()
 
 export function getTheme(): Theme {

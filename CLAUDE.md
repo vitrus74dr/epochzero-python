@@ -14,6 +14,8 @@ live in `progress/checked.json` (`server/progress.py`), so students can `git pul
 - `uv run epochzero --rebuild` rebuilds the UI first
 - Dev: `uv run epochzero --dev` (API only) + `pnpm -C web dev` (UI on :5173, proxies /api)
 - Tests: `capped -m 8G -- uv run pytest -q`; UI typecheck + build: `pnpm -C web build`
+- `web/dist/` is committed (students need only uv). After any UI change, rebuild and commit
+  it; `tools/check_all.sh` fails if it's stale (Vite builds are reproducible)
 - Content checks: `tools/check_all.sh` (app tests, UI build, every lesson snippet run in a
   learner env with Arcade headless, stub tests fail cleanly, platformer levels reachable).
   `tools/learner_env.sh` creates `.learner-env/` with the course's libraries; the parts run

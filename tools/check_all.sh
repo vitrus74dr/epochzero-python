@@ -10,8 +10,12 @@ step "app tests"
 out=$(uv run pytest -q 2>&1 | tail -1); echo "$out"
 case "$out" in *failed*|*error*) fail=1 ;; *passed*) ;; *) fail=1 ;; esac
 
-step "UI typecheck + build"
-pnpm -C web -s build >/dev/null 2>&1 && echo ok || { echo FAILED; fail=1; }
+step "UI typecheck + build (and the committed build is current)"
+if pnpm -C web -s build >/dev/null 2>&1; then
+  # web/dist is committed so students don't need Node; it must match the source.
+  if [ -z "$(git status --porcelain -- web/dist)" ]; then echo ok
+  else echo "web/dist differs from a fresh build: commit it"; git status --short -- web/dist | head -5; fail=1; fi
+else echo FAILED; fail=1; fi
 
 step "lesson snippets"
 out=$(ARCADE_HEADLESS=1 uv run -q --project .learner-env python tools/check_md.py curriculum/week*/lesson_*.md 2>&1)

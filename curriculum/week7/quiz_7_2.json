@@ -1,0 +1,42 @@
+{
+  "id": "W7.2.quiz",
+  "title": "Data leakage and train/test discipline",
+  "pass_mark": 4,
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "A decision tree scores **1.00** on the training set and **0.89** on the test set. Which number tells you how it will do on new data?",
+      "choices": ["1.00, because it learned from more data", "0.89, the score on data it never saw", "The average, 0.945", "Neither; accuracy can't be measured"],
+      "answer": 1,
+      "explain": "Only the held-out test score measures performance on unseen data. The perfect training score shows the tree memorised its examples (overfitting)."
+    },
+    {
+      "id": "q2",
+      "prompt": "Which of these is **data leakage**?",
+      "choices": ["Fitting a `StandardScaler` on the whole dataset, then splitting into train and test", "Splitting first, then fitting the scaler on the training part only", "Putting the scaler and model in one `Pipeline`", "Using `stratify=y` in `train_test_split`"],
+      "answer": 0,
+      "explain": "Fitting the scaler on all the data lets the test set's mean and spread influence training. Split first, or let a Pipeline do it for you."
+    },
+    {
+      "id": "q3",
+      "prompt": "You try 20 values of `k` and keep the one with the best **test** score. What's wrong?",
+      "choices": ["Nothing; that's how tuning works", "The test set has been used to choose the model, so its score is now optimistic", "20 values is too few", "KNN can't be tuned"],
+      "answer": 1,
+      "explain": "Choosing by test score tunes the model to the test set, so it stops being a fair final exam. Choose with cross-validation on the training data, and use the test set once."
+    },
+    {
+      "id": "q4",
+      "prompt": "Why pass `stratify=y` to `train_test_split`?",
+      "choices": ["It makes the split faster", "It keeps each class's proportion the same in the train and test sets", "It removes duplicate rows", "It scales the features"],
+      "answer": 1,
+      "explain": "Stratifying preserves the class balance in both parts, so an unlucky shuffle can't leave a class under-represented in the test set."
+    },
+    {
+      "id": "q5",
+      "prompt": "Ten balanced classes. A `DummyClassifier` scores 0.10 and your model 0.12. What should you conclude?",
+      "choices": ["The model is 20% better, so it's good", "The model has learned almost nothing beyond guessing", "Accuracy is the wrong metric for ten classes", "The test set is too big"],
+      "answer": 1,
+      "explain": "The baseline shows guessing already gets 0.10. Beating it by 0.02 means the model barely uses the features; always judge a score against a baseline."
+    }
+  ]
+}

@@ -10,6 +10,7 @@ the tutor walks through those from the result file.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -60,7 +61,8 @@ def report(console: Console, quiz: quizzes.Quiz, attempt: dict) -> None:
     console.print(Panel(
         Text.assemble((verdict[0], verdict[1]),
                       f"  {attempt['score']}/{attempt['total']}  (pass mark {attempt['pass_mark']})"
-                      f"  ·  recorded for {attempt['item']}"),
+                      f"  ·  recorded for {attempt['item']}" if attempt["item"]
+                      else "  ·  practice (not recorded)"),
         border_style=DIM, expand=False))
     if attempt["answers"] and not all(a["correct"] for a in attempt["answers"]):
         console.print(Text("Ask the tutor to walk through the missed questions.", style=DIM))
@@ -69,7 +71,7 @@ def report(console: Console, quiz: quizzes.Quiz, attempt: dict) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pygrid-quiz")
     parser.add_argument("quiz_id", help="e.g. W1.2.quiz")
-    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--root", type=Path, default=Path(os.environ.get("PYGRID_ROOT") or ROOT))
     args = parser.parse_args(argv)
     paths = Paths(args.root.resolve())
     console = Console(theme=THEME)

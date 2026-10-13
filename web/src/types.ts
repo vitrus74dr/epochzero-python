@@ -1,7 +1,9 @@
 export type VerifyKind = 'pytest' | 'quiz' | 'tutor' | 'artifact'
 /** `verify` is the only kind of record that can verify this item. */
 export type Item = { id: string; text: string; checked: boolean; verified: boolean; verify: VerifyKind }
-export type Task = { id: string; title: string; kind: 'PROJECT' | 'QUIZ' | null; items: Item[] }
+/** Workspace-relative paths; a doc is null until the file exists. */
+export type TaskDocs = { folder: string | null; plan: string | null; walkthrough: string | null }
+export type Task = { id: string; title: string; kind: 'PROJECT' | 'QUIZ' | null; items: Item[]; docs: TaskDocs }
 export type Week = {
   n: number
   title: string
@@ -42,11 +44,11 @@ export type TestResult = {
   counts: Record<'passed' | 'failed' | 'error' | 'skipped', number>
   tests: TestCase[]
   exit_code: number | null
-  record: Verification | null
+  records: Verification[]
   error: string | null
 }
 export type TestEvent =
-  | { type: 'start'; argv: string[]; cwd: string; item: string | null }
+  | { type: 'start'; argv: string[]; cwd: string; items: string[] }
   | { type: 'output'; data: string }
   | ({ type: 'result' } & TestResult)
 
@@ -69,7 +71,7 @@ export type QuizSpec = {
   questions: { id: string; prompt: string; choices: string[] }[]
 }
 export type QuizResult = {
-  item: string
+  item: string | null
   score: number
   total: number
   pass_mark: number

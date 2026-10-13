@@ -9,7 +9,7 @@ import { Terminal, type TermStatus } from '../components/Terminal'
 import { TestResults, type TestRun } from '../components/TestResults'
 import { onServerEvent } from '../events'
 import { isRunTests, mod } from '../keys'
-import { navigate } from '../router'
+import { hrefFor, navigate } from '../router'
 import type { Item, TestResult, TrackerData } from '../types'
 
 type OpenFile = { path: string; base: string; version: string; loadId: number }
@@ -52,7 +52,10 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
   const cur = tracker?.current?.item
   const defaultItem = cur && eligible.some((i) => i.id === cur.id) ? cur.id : ''
   const chosenItem = testItem ?? defaultItem
-  const testTarget = open ? dirOf(open.path) : null
+  const curWeek = tracker?.weeks.find((w) => w.n === tracker.current?.week)
+  const curFolder = curWeek?.tasks.find((t) => t.id === tracker?.current?.task)?.docs.folder ?? null
+  // The open file's folder, else the current task's folder.
+  const testTarget = open ? dirOf(open.path) : curFolder
 
   const dirty = open !== null && draft !== open.base
   // Event handlers registered once need the latest state.
@@ -192,6 +195,10 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
               <Panel title="Editor" meta={editorMeta} className="wb-panel"
                      actions={open && (
                        <>
+                         {open.path.endsWith('.md') && (
+                           <a className="hdr-btn" href={hrefFor('doc', open.path)}
+                              title="Rendered view (save first to see your edits)">[ preview ]</a>
+                         )}
                          <button className="hdr-btn" onClick={() => save()} disabled={!dirty}
                                  title="Save (Ctrl/Cmd+S)">[ save ]</button>
                          <button className="hdr-btn hdr-run" onClick={runCurrent}

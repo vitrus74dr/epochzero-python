@@ -55,6 +55,15 @@ def child_env() -> dict[str, str]:
     return env
 
 
+def terminal_env(paths: Paths) -> dict[str, str]:
+    """child_env() plus what `claude` running in this terminal needs: the
+    pygrid-tutor/pygrid-quiz shims on PATH (bin/), the app dir, and the data
+    root (tracker, progress/) this server is serving."""
+    env = child_env()
+    env["PATH"] = os.pathsep.join([str(ROOT / "bin"), env.get("PATH", "")])
+    return env | {"PYGRID_APP": str(ROOT), "PYGRID_ROOT": str(paths.root)}
+
+
 def command_for(paths: Paths, mode: str, file: str | None) -> tuple[list[str], Path]:
     """argv and cwd for a terminal session. `file` is a workspace path for
     mode "run" and a quiz id for mode "quiz"."""
@@ -133,7 +142,7 @@ def router(paths: Paths) -> APIRouter:
 
         paths.workspace.mkdir(exist_ok=True)
         try:
-            proc = PtyProcess.spawn(argv, cwd=str(cwd), env=child_env(),
+            proc = PtyProcess.spawn(argv, cwd=str(cwd), env=terminal_env(paths),
                                     dimensions=(max(rows, 1), max(cols, 1)))
         except Exception as e:
             await fail(f"could not start {argv[0]}: {e}")

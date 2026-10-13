@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from server import tracker as tr
 from server.paths import Paths
+from server.tasks import task_docs
 from server.verifications import VerificationLog, verify_kind
 
 RECENT = 6
@@ -46,7 +47,7 @@ def item_json(i: tr.Item, verified: set[str]) -> dict:
             "verify": verify_kind(i.text)}
 
 
-def tracker_json(t: tr.Tracker, log: VerificationLog) -> dict:
+def tracker_json(t: tr.Tracker, log: VerificationLog, paths: Paths) -> dict:
     records = log.read()
     verified = {r.item for r in records if r.passed}
     current = t.current()
@@ -64,6 +65,7 @@ def tracker_json(t: tr.Tracker, log: VerificationLog) -> dict:
                 "title": task.title,
                 "kind": task.kind,
                 "items": [item_json(i, verified) for i in task.items],
+                "docs": task_docs(paths, task.id),
             } for task in w.tasks],
         } for w in t.weeks],
         "completion": {
@@ -95,7 +97,7 @@ def router(paths: Paths) -> APIRouter:
     @r.get("")
     def get_tracker():
         try:
-            return tracker_json(tr.load(paths.tracker), log)
+            return tracker_json(tr.load(paths.tracker), log, paths)
         except tr.TrackerError as e:
             return parse_error(e)
 
@@ -109,6 +111,6 @@ def router(paths: Paths) -> APIRouter:
             raise HTTPException(404, e.args[0]) from None
         except CheckRefused as e:
             raise HTTPException(409, str(e)) from None
-        return tracker_json(t, log)
+        return tracker_json(t, log, paths)
 
     return r

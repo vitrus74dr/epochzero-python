@@ -6,12 +6,12 @@ NDJSON while it runs; the pass/fail summary comes from a JUnit XML report,
 not from scraping the console.
 
 Protocol (one JSON object per line):
-    {"type": "start", "argv": [...], "cwd": "week1/calc", "item": "W1.3.c"|null}
+    {"type": "start", "argv": [...], "cwd": "week1/calc", "items": ["W1.3.c"]}
     {"type": "output", "data": "..."}
     {"type": "result", "passed": true, "summary": "6 passed", "counts": {...},
-     "tests": [...], "exit_code": 0, "record": {...}|null, "error": null}
+     "tests": [...], "exit_code": 0, "records": [...], "error": null}
 
-A run that names an item appends a verification record for it, pass or fail.
+A run that names items appends a verification record for each, pass or fail.
 Only a run with at least one passing test and no failures or errors passes.
 """
 
@@ -112,14 +112,15 @@ def pytest_argv(paths: Paths, target: Path, report: Path) -> tuple[list[str], Pa
     return argv, cwd
 
 
-async def run_pytest(paths: Paths, rel: str, item: str | None) -> AsyncIterator[dict]:
+async def run_pytest(paths: Paths, rel: str, items: list[str],
+                     by: str = "app") -> AsyncIterator[dict]:
     ws = paths.workspace.resolve()
     target = resolve_in(ws, rel)
     with tempfile.TemporaryDirectory(prefix="pygrid-junit-") as tmp:
         report = Path(tmp) / "report.xml"
         argv, cwd = pytest_argv(paths, target, report)
         yield {"type": "start", "argv": argv, "cwd": cwd.relative_to(ws).as_posix() or ".",
-               "item": item}
+               "items": items}
 
         env = child_env() | {"PYTHONDONTWRITEBYTECODE": "1", "PYTHONUNBUFFERED": "1"}
         env.pop("COLORTERM", None)
@@ -160,12 +161,11 @@ async def run_pytest(paths: Paths, rel: str, item: str | None) -> AsyncIterator[
     passed, summary, counts = summarize(tests, exit_code)
     if error:
         passed, summary = False, error
-    record = None
-    if item:
-        record = VerificationLog(paths.verifications).append(Record(
-            item=item, kind="pytest", passed=passed, summary=summary, by="app")).model_dump()
+    log = VerificationLog(paths.verifications)
+    records = [log.append(Record(item=i, kind="pytest", passed=passed, summary=summary, by=by))
+               .model_dump() for i in items]
     yield {"type": "result", "passed": passed, "summary": summary, "counts": counts,
-           "tests": tests, "exit_code": exit_code, "record": record, "error": error}
+           "tests": tests, "exit_code": exit_code, "records": records, "error": error}
 
 
 class RunRequest(BaseModel):
@@ -202,7 +202,7 @@ def router(paths: Paths) -> APIRouter:
             # starts can't leave the lock held. Disconnecting mid-run kills
             # pytest (run_pytest's finally) and records nothing.
             async with busy:
-                async for event in run_pytest(paths, body.path, body.item):
+                async for event in run_pytest(paths, body.path, [body.item] if body.item else []):
                     yield json.dumps(event) + "\n"
 
         return StreamingResponse(stream(), media_type="application/x-ndjson",

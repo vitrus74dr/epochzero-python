@@ -10,6 +10,7 @@ import { toggleTheme } from './theme/theme'
 import { useTracker } from './useTracker'
 import type { TestResult } from './types'
 import { Dashboard } from './views/Dashboard'
+import { DocView } from './views/Doc'
 import { QuizView } from './views/Quiz'
 import { Workbench } from './views/Workbench'
 
@@ -109,6 +110,7 @@ export default function App() {
 
         {route.view === 'dashboard' && data && <Dashboard data={data} onUpdate={setData} />}
         {route.view === 'quiz' && ready && <QuizView quizId={route.file} />}
+        {route.view === 'doc' && ready && <DocView path={route.file} />}
         {workbenchMounted && <Workbench file={workbenchFile} visible={onWorkbench}
                                         tracker={data} onTestResult={setTests} />}
       </main>

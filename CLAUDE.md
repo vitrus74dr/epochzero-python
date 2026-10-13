@@ -13,6 +13,8 @@ source of truth for learner progress; never renumber or reword its item IDs.
 - Dev: `uv run pygrid --dev` (API only) + `pnpm -C web dev` (UI on :5173, proxies /api)
 - Tests: `capped -m 8G -- uv run pytest -q`; UI typecheck + build: `pnpm -C web build`
 - Terminal quiz: `uv run pygrid-quiz <quiz id>` (needs a real TTY; the cockpit runs it in its pty)
+- Tutor CLI: `uv run pygrid-tutor status|verify|record|checkoff|quiz-add|quiz-results`; the
+  slash commands in `workspace/.claude/commands/` call it via the `bin/` shim
 
 ## Invariants
 - Bind 127.0.0.1 only. Every /api route (HTTP, SSE, WebSocket) goes through
@@ -22,6 +24,10 @@ source of truth for learner progress; never renumber or reword its item IDs.
 - Which kind of record may verify an item is decided by `verify_kind()` in
   `server/verifications.py`: a pytest run only records "pytest" items, a quiz only its
   task's "Quiz:" item. Answers and explanations for missed questions never reach the browser.
+- Tutor commands must call plain `pygrid-tutor ...`: Claude Code's permission check refuses
+  commands with shell variable expansion, and the tutor session can only touch `workspace/`,
+  so anything outside it (tracker, progress/, curriculum/) needs a `pygrid-tutor` subcommand.
+- Task folders are `workspace/weekN/tN.M-<slug>/` (`server/tasks.py`).
 - Colours come from `web/src/theme/tokens.css` only. `tests/test_contrast.py` enforces
   WCAG AA on every text/surface pair; if you change a token, the test must still pass.
 - xterm.js and CodeMirror can't read CSS variables: build their themes from

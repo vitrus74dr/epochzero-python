@@ -8,6 +8,11 @@ result file and the same verification record.
 
 Results: progress/quizzes/<id>.json, {"id", "title", "item", "attempts": [...]},
 newest attempt last. The tutor reads it to walk through missed questions.
+
+A quiz for a task with a "Quiz:" item is graded: its attempts write a
+verification record for that item. A quiz for any other task (the tutor's
+short check after a concept) is practice: attempts are saved, item is null,
+and nothing is recorded.
 """
 
 from __future__ import annotations
@@ -113,9 +118,9 @@ def get(paths: Paths, quiz_id: str) -> Quiz:
     return quizzes[quiz_id]
 
 
-def item_for(quiz: Quiz, t: tr.Tracker) -> tr.Item:
+def item_for(quiz: Quiz, t: tr.Tracker) -> tr.Item | None:
     """The tracker item a quiz verifies: its explicit "item", else the
-    task's "Quiz:" item. It must be a quiz item."""
+    task's "Quiz:" item, else None (a practice quiz)."""
     if quiz.item:
         try:
             item = t.item(quiz.item)
@@ -127,7 +132,7 @@ def item_for(quiz: Quiz, t: tr.Tracker) -> tr.Item:
             raise QuizError(f"{quiz.id}: no task {quiz.task_id} in the tracker")
         item = next((i for i in task.items if verify_kind(i.text) == "quiz"), None)
         if item is None:
-            raise QuizError(f"{quiz.id}: task {quiz.task_id} has no Quiz: item")
+            return None
     if verify_kind(item.text) != "quiz":
         raise QuizError(f"{quiz.id}: {item.id} is not a quiz item")
     return item
@@ -149,8 +154,9 @@ def record_attempt(paths: Paths, quiz: Quiz, answers: dict[str, int], by: str) -
     Refused for a locked week, so a quiz can't verify ahead of the gate."""
     t = tr.load(paths.tracker)
     item = item_for(quiz, t)
-    if not t.item_unlocked(item.id):
-        raise QuizError(f"{item.id} is in a locked week")
+    if not week_unlocked(t, quiz):
+        raise QuizError(f"{quiz.id} is in a locked week")
+    item_id = item.id if item else None
     attempt = grade(quiz, answers) | {
         "at": datetime.now().astimezone().isoformat(timespec="seconds"), "by": by}
 
@@ -162,14 +168,19 @@ def record_attempt(paths: Paths, quiz: Quiz, answers: dict[str, int], by: str) -
         except (OSError, ValueError):
             attempts = []
         attempts.append(attempt)
-        write_atomic(out, json.dumps({"id": quiz.id, "title": quiz.title, "item": item.id,
+        write_atomic(out, json.dumps({"id": quiz.id, "title": quiz.title, "item": item_id,
                                       "attempts": attempts}, indent=2, ensure_ascii=False) + "\n")
 
-    summary = f"{attempt['score']}/{attempt['total']} (pass {quiz.pass_mark})"
-    VerificationLog(paths.verifications).append(Record(
-        item=item.id, kind="quiz", passed=attempt["passed"], summary=summary,
-        at=attempt["at"], by=by))
-    return attempt | {"item": item.id}
+    if item_id:
+        summary = f"{attempt['score']}/{attempt['total']} (pass {quiz.pass_mark})"
+        VerificationLog(paths.verifications).append(Record(
+            item=item_id, kind="quiz", passed=attempt["passed"], summary=summary,
+            at=attempt["at"], by=by))
+    return attempt | {"item": item_id}
+
+
+def week_unlocked(t: tr.Tracker, quiz: Quiz) -> bool:
+    return t.week_unlocked(int(quiz.task_id.split(".")[0]))
 
 
 def last_attempt(paths: Paths, quiz_id: str) -> dict | None:
@@ -218,7 +229,7 @@ def router(paths: Paths) -> APIRouter:
             if t is not None:
                 try:
                     it = item_for(q, t)
-                    item, unlocked = it.id, t.item_unlocked(it.id)
+                    item, unlocked = (it.id if it else None), week_unlocked(t, q)
                 except QuizError as e:
                     problem = str(e)
             out.append({"id": q.id, "title": q.title, "item": item, "unlocked": unlocked,

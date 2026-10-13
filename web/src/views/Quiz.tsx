@@ -148,7 +148,7 @@ function QuizDetail({ quizId, summary }: { quizId: string | null; summary: QuizS
 
   return (
     <Panel title={spec ? spec.title : 'Quiz'} className="quiz-detail"
-           meta={spec ? `${spec.id}${summary?.item ? ` ▸ ${summary.item}` : ''}` : undefined}
+           meta={spec ? `${spec.id} ▸ ${summary?.item ?? 'practice'}` : undefined}
            actions={spec && mode !== 'terminal' && !locked && (
              <button className="hdr-btn" onClick={() => { setTermKey((k) => k + 1); setMode('terminal') }}
                      title="Same quiz with rich + inquirer in a real terminal">[ run in terminal ]</button>
@@ -219,7 +219,7 @@ function QuizDetail({ quizId, summary }: { quizId: string | null; summary: QuizS
         <div className="quiz-result">
           <p className="quiz-score">
             <Tag kind={result.passed ? 'pass' : 'fail'} /> {result.score}/{result.total}
-            <span className="muted"> · pass mark {result.pass_mark} · recorded for {result.item}</span>
+            <span className="muted"> · pass mark {result.pass_mark} · {result.item ? `recorded for ${result.item}` : 'practice, not recorded'}</span>
           </p>
           <ul className="quiz-review">
             {result.results.map((r, i) => (
@@ -232,7 +232,7 @@ function QuizDetail({ quizId, summary }: { quizId: string | null; summary: QuizS
           </ul>
           <p className="muted">
             {result.passed
-              ? `Passed: tick ${result.item} on the dashboard.`
+              ? result.item ? `Passed: tick ${result.item} on the dashboard.` : 'Passed.'
               : `Missed questions aren't explained here. Ask the tutor to walk through them, then retake.`}
           </p>
           <p>

@@ -164,3 +164,14 @@ def test_quiz_mode_rejects_bad_id(client):
     with connect(client, mode="quiz", file="../../etc") as ws:
         msg = json.loads(ws.receive_text())
         assert msg["type"] == "error" and "quiz id" in msg["message"]
+
+
+def test_terminal_knows_app_and_data_roots(client, paths):
+    from server.paths import ROOT
+    script(paths, "env.py", 'import os\nprint("APP=" + os.environ["PYGRID_APP"])\n'
+                            'print("DATA=" + os.environ["PYGRID_ROOT"])\n')
+    with connect(client, mode="run", file="env.py") as ws:
+        out, _ = read_until(ws, "DATA=")
+        read_more, _ = read_until(ws, "\n")
+    out += read_more
+    assert f"APP={ROOT}" in out and f"DATA={paths.root}" in out

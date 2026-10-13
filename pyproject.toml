@@ -14,6 +14,7 @@ dependencies = [
 [project.scripts]
 pygrid = "server.main:run"
 pygrid-quiz = "server.quiz_cli:main"
+pygrid-tutor = "server.tutor_cli:main"
 
 [dependency-groups]
 dev = [

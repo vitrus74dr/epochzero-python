@@ -3,6 +3,7 @@
    one `--name: #RRGGBB;` per line inside each theme block. */
 
 :root, :root[data-theme="dark"] {
+  color-scheme: dark; /* native controls and scrollbars follow the toggle */
   --bg:        #0E1114;  /* deep graphite */
   --surface:   #151A1F;
   --surface-2: #1C2329;
@@ -20,6 +21,7 @@
 }
 
 :root[data-theme="light"] {
+  color-scheme: light;
   --bg:        #F3F1EC;  /* warm paper */
   --surface:   #FBFAF7;
   --surface-2: #ECE9E2;

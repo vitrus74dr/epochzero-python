@@ -67,9 +67,9 @@ export function TestResults({ target, items, item, onItem, run, onRun }: Props) 
           <>
             <p className="tests-summary">
               <Tag kind={result.passed ? 'pass' : 'fail'} /> {result.summary}
-              {result.record && (
+              {result.records.length > 0 && (
                 <span className="muted">
-                  {' · '}recorded for {result.record.item}
+                  {' · '}recorded for {result.records.map((r) => r.item).join(', ')}
                   {result.passed ? ': tick it on the dashboard' : ''}
                 </span>
               )}

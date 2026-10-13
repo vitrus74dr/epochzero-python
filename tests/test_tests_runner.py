@@ -43,7 +43,8 @@ def test_pass_records_and_unlocks_tick(client, paths):
     assert result["type"] == "result"
     assert result["passed"] and result["summary"] == "2 passed"
     assert [t["outcome"] for t in result["tests"]] == ["passed", "passed"]
-    assert result["record"]["item"] == "W1.1.c" and result["record"]["kind"] == "pytest"
+    [record] = result["records"]
+    assert record["item"] == "W1.1.c" and record["kind"] == "pytest"
     [rec] = VerificationLog(paths.verifications).read()
     assert rec.passed and rec.by == "app"
     assert client.post("/api/tracker/check", json={"item": "W1.1.c"}).status_code == 200
@@ -66,7 +67,7 @@ def test_failure_shows_fail_and_blocks_tick(client, paths):
 def test_without_item_records_nothing(client, paths):
     folder = task(paths, {"test_calc.py": PASSING})
     _, events = run(client, path=folder)
-    assert events[-1]["passed"] and events[-1]["record"] is None
+    assert events[-1]["passed"] and events[-1]["records"] == []
     assert VerificationLog(paths.verifications).read() == []
 
 

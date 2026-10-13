@@ -22,7 +22,8 @@ export function useTracker(enabled: boolean) {
     if (!enabled) return
     refresh()
     return onServerEvent((e) => {
-      if (e.type === 'tracker' || e.type === 'verifications') refresh()
+      // workspace: a task folder or its plan/walkthrough may have appeared.
+      if (['tracker', 'verifications', 'workspace'].includes(e.type)) refresh()
     })
   }, [enabled, refresh])
 

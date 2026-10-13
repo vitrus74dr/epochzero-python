@@ -6,7 +6,8 @@ import { Inline } from '../components/Inline'
 import { Panel } from '../components/Panel'
 import { Progress } from '../components/Progress'
 import { Tag } from '../components/Tag'
-import type { Item, TrackerData, Week } from '../types'
+import { hrefFor } from '../router'
+import type { Item, Task, TrackerData, Week } from '../types'
 
 type Props = {
   data: TrackerData
@@ -20,6 +21,19 @@ function formatTime(iso: string): string {
   return sameDay
     ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
     : d.toLocaleDateString([], { month: 'short', day: 'numeric' })
+}
+
+/** ▸ week1/t1.3-calc/ [ plan ] [ walkthrough ] under a task heading. */
+function TaskDocs({ task }: { task: Task }) {
+  const { folder, plan, walkthrough } = task.docs
+  if (!folder) return null
+  return (
+    <p className="task-docs muted">
+      ▸ {folder}/
+      {plan && <> <a className="hdr-btn" href={hrefFor('doc', plan)}>[ plan ]</a></>}
+      {walkthrough && <> <a className="hdr-btn" href={hrefFor('doc', walkthrough)}>[ walkthrough ]</a></>}
+    </p>
+  )
 }
 
 function WeekCard({ week, current, selected, onSelect }: {
@@ -131,6 +145,7 @@ export function Dashboard({ data, onUpdate }: Props) {
                   Task {task.id}: {task.title}{' '}
                   {task.kind && <Tag kind={task.kind === 'QUIZ' ? 'quiz' : 'project'} />}
                 </h3>
+                <TaskDocs task={task} />
                 <Checklist items={task.items} currentId={cur?.item.id}
                            locked={!week.unlocked} onToggle={toggle} />
               </section>

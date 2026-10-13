@@ -1,0 +1,12 @@
+#!/bin/sh
+# Shim for pygrid-tutor / pygrid-quiz (the latter is a symlink to this file).
+# The cockpit terminal puts this directory on PATH so the tutor can run a plain
+# `pygrid-tutor status`: Claude Code's permission check refuses commands that
+# contain shell variable expansions like "$PYGRID_APP". Outside the cockpit,
+# add <pygrid>/bin to PATH yourself.
+app="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+name="$(basename "$0")"
+if [ -x "$app/.venv/bin/$name" ]; then
+    exec "$app/.venv/bin/$name" "$@"
+fi
+exec uv run -q --project "$app" "$name" "$@"

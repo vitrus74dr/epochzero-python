@@ -1,8 +1,9 @@
 """Lessons (GET /api/lessons/{week}) and task scaffolds.
 
-One markdown lesson per task: curriculum/weekN/lesson_N_M.md. Week 1 ships
-with the app; later weeks are authored just-in-time by the tutor, so a task
-without a lesson file is normal, not an error.
+One markdown lesson per task: curriculum/weekN/lesson_N_M.md. All twelve
+weeks ship with the app; the tutor can add or replace lessons
+(`pygrid-tutor lesson-add`), and a task without a lesson file is shown as
+"no lesson yet", not treated as an error.
 
 Scaffolds: curriculum/weekN/stubs/tN.M-<slug>/ holds starter files (tests
 first, plus signature-only stubs) that `pygrid-tutor scaffold` copies into the

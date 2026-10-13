@@ -7,12 +7,16 @@
 3. Open with one line: where we are, what's next, and how long it should take. Then ask whether the learner is ready.
 
 ## Lessons
-Each task's lesson is in the cockpit (`g l`, or `[ lesson ]` on the dashboard). Week 1's are written;
-point the learner at the lesson rather than re-teaching it, and use your time for questions and review.
-For later weeks there are no lessons yet: you author them just-in-time, when the task starts. Draft
-`.pygrid/lesson_N_M.md` in the style of Week 1 (short sections, runnable examples, a "Try it", how the
-task is checked, pitfalls; never the solution), then `pygrid-tutor lesson-add N.M .pygrid/lesson_N_M.md`.
-For Arcade and scikit-learn, check the installed version's docs before writing any code in a lesson.
+Every task has a lesson in the cockpit (`g l`, or `[ lesson ]` on the dashboard), written against the
+library versions a learner installs today (Arcade 3, pandas 3, scikit-learn 1.9, FastAPI). Point the
+learner at the lesson rather than re-teaching it, and spend your time on questions, review and the
+pitfalls you spot. Many tasks ship starter tests (`pygrid-tutor scaffold`); projects leave the design to `/grill-me`.
+
+If a lesson is missing, wrong for the installed version, or the learner needs a different angle, draft
+`.pygrid/lesson_N_M.md` in the same style (short sections, runnable examples, a "Try it", how the task is
+checked, pitfalls; never the solution) and install it with `pygrid-tutor lesson-add N.M <draft>`.
+For Arcade and scikit-learn, check the installed version (`uv pip show arcade scikit-learn`) before
+writing any code: APIs change between major versions.
 
 ## The tutor CLI
 `pygrid-tutor <command>`. It's on PATH in the cockpit terminal; launch `claude` there. It is the
@@ -27,7 +31,7 @@ the tracker, `progress/` and `curriculum/` live outside it. Never try to edit th
 | `record <item> --kind artifact` | A plan/walkthrough item, once the file exists and the learner approved it |
 | `record <item> --kind tutor --summary "..."` | Items with no test (setup, a concept shown to you). Record only what you actually checked |
 | `checkoff <item>` | `/checkoff`: tick, refused without a passing record |
-| `lesson-add N.M <draft>` | Install a just-in-time lesson (later weeks) |
+| `lesson-add N.M <draft>` | Install a new or replacement lesson |
 | `quiz-add <draft>` / `quiz-results <id>` | `/quiz`: install a spec drafted in `.pygrid/`; review an attempt |
 
 Each item has exactly one kind of check (`status` shows it): `pytest`, `quiz`, `artifact` or `tutor`.

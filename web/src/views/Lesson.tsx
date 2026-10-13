@@ -116,8 +116,8 @@ export function LessonView({ taskId, data, onUpdate }: Props) {
             <Markdown text={lesson.markdown} />
           ) : lessons && !error ? (
             <p className="muted">
-              No lesson for this task yet. Lessons after week 1 are written just-in-time: ask the
-              tutor in Claude Code to start the task.
+              No lesson for this task yet. Ask the tutor in Claude Code: it can write one
+              (<code className="inline-code">pygrid-tutor lesson-add</code>).
             </p>
           ) : null}
         </Panel>

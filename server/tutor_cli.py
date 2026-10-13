@@ -14,7 +14,7 @@ through its file watcher.
     pygrid-tutor checkoff W1.3.c [--undo]
     pygrid-tutor quiz-check .pygrid/quiz_1_2.json
     pygrid-tutor quiz-add .pygrid/quiz_1_2.json      # validate, install into curriculum/
-    pygrid-tutor lesson-add 2.1 .pygrid/lesson_2_1.md  # install a just-in-time lesson
+    pygrid-tutor lesson-add 2.1 .pygrid/lesson_2_1.md  # install a new or replacement lesson
     pygrid-tutor quiz-results W1.2.quiz
 
 Claude Code only lets the tutor session touch files inside workspace/, so

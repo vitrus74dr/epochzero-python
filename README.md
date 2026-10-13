@@ -12,9 +12,10 @@ Requires `uv` and `pnpm`. The first run builds the web UI.
 
 ## Lessons
 Each task has a lesson (`g l`, or `[ lesson ]` on the dashboard) with its acceptance
-criteria pinned on top. Week 1 ships in `curriculum/week1/` along with the W1.2 quiz and
-starter tests (`stubs/`, copied in by `pygrid-tutor scaffold`). Later weeks are written
-just-in-time by the tutor (`pygrid-tutor lesson-add`).
+criteria pinned on top: 39 lessons over 12 weeks, from `print()` to a Pac-Man with ghost AI,
+by way of a Tkinter app, a pandas report, scikit-learn and a FastAPI service. Content lives
+in `curriculum/weekN/`: `lesson_N_M.md`, quizzes (`quiz_N_M.json`) and starter tests
+(`stubs/`, copied into the workspace by `pygrid-tutor scaffold`).
 
 ## Tests and quizzes
 - **Tests:** in the workbench, `Ctrl/Cmd+Shift+Enter` runs pytest on the open file's

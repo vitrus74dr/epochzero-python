@@ -7,7 +7,7 @@ import pytest
 
 TOKENS = Path(__file__).resolve().parent.parent / "web/src/theme/tokens.css"
 
-FOREGROUNDS = ["text", "text-muted", "accent", "accent-2", "success", "danger", "info"]
+FOREGROUNDS = ["text", "text-muted", "accent", "accent-2", "success", "danger", "info", "magenta"]
 SURFACES = ["bg", "surface", "surface-2"]
 AA = 4.5
 

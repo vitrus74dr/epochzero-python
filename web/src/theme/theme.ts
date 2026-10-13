@@ -32,7 +32,7 @@ export function onThemeChange(fn: (t: Theme) => void): () => void {
 
 export const TOKEN_NAMES = [
   'bg', 'surface', 'surface-2', 'border', 'grid', 'text', 'text-muted',
-  'accent', 'accent-2', 'success', 'danger', 'info', 'selection',
+  'accent', 'accent-2', 'success', 'danger', 'info', 'magenta', 'selection',
 ] as const
 export type TokenName = (typeof TOKEN_NAMES)[number]
 

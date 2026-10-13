@@ -15,6 +15,7 @@
   --success:   #7FB07F;
   --danger:    #CC7070;
   --info:      #7A9CC6;
+  --magenta:   #B48EB0;  /* ANSI magenta in the terminal only */
   --selection: #2B3E3B;
 }
 
@@ -31,6 +32,7 @@
   --success:   #3C743C;
   --danger:    #A84444;
   --info:      #3D628F;
+  --magenta:   #8A4F86;
   --selection: #CFE3DF;
 }
 

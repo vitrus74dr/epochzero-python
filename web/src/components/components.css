@@ -113,3 +113,54 @@
 .checklist-id { color: var(--text-muted); }
 .checklist-current .checklist-id { color: var(--accent-2); }
 .checklist li:has(.is-checked) .checklist-text { color: var(--text-muted); }
+
+/* ── Panel header actions ──────────────────────────────── */
+.panel-actions { display: flex; gap: 1ch; flex: none; }
+.panel-meta { overflow: hidden; text-overflow: ellipsis; text-transform: none; letter-spacing: 0; }
+.hdr-btn, .hdr-tab {
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: pre;
+}
+.hdr-btn:hover:not(:disabled), .hdr-tab:hover:not(:disabled) { color: var(--accent); }
+.hdr-btn:disabled, .hdr-tab:disabled { cursor: default; }
+.hdr-btn:disabled { color: var(--text-muted); }
+.hdr-run { color: var(--accent); }
+.hdr-tab { padding: 0 1ch; }
+.hdr-tab.is-on { color: var(--text); background: var(--surface-2); }
+
+/* ── File tree ─────────────────────────────────────────── */
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+.tree-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 2px 8px 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+.tree-row:hover { background: var(--surface-2); }
+.tree-dir { color: var(--text-muted); }
+.tree-glyph { color: var(--text-muted); display: inline-block; width: 1ch; }
+.tree-file.is-active { background: var(--selection); color: var(--text); }
+.tree-file.is-active .tree-glyph { color: var(--accent); }
+.tree-empty { padding: 4px 12px; }
+
+/* ── Overlay / shortcut sheet ──────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  z-index: 10;
+  padding: 16px;
+}
+.sheet { width: min(520px, 100%); }
+.shortcuts { margin: 0; display: grid; gap: 6px; }
+.shortcuts div { display: grid; grid-template-columns: 22ch 1fr; gap: 2ch; }
+.shortcuts dt { color: var(--accent); }
+.shortcuts dd { margin: 0; }

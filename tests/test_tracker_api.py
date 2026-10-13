@@ -1,33 +1,14 @@
-import shutil
 import threading
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
 from server import tracker as tr
-from server.main import create_app
 from server.paths import Paths
 from server.tracker_api import CheckRefused, check_item
 from server.verifications import Record, VerificationLog
 
 REAL = Path(__file__).resolve().parent.parent / "CURRICULUM_TRACKER.md"
-TOKEN = "t"
-HOST = "127.0.0.1:8765"
-
-
-@pytest.fixture
-def paths(tmp_path):
-    shutil.copy(REAL, tmp_path / "CURRICULUM_TRACKER.md")
-    return Paths(tmp_path)
-
-
-@pytest.fixture
-def client(paths):
-    app = create_app(token=TOKEN, root=paths.root, dist=paths.root / "nodist", watch=False)
-    c = TestClient(app, base_url=f"http://{HOST}")
-    c.post("/api/session", json={"token": TOKEN})
-    return c
 
 
 def verify(paths, item, passed=True):

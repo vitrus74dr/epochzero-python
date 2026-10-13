@@ -205,6 +205,14 @@ def locked(lock_path: Path) -> Iterator[None]:
 def write_atomic(path: Path, text: str) -> None:
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
     try:
+        # mkstemp creates 0600; keep the existing file's mode, or use the umask default.
+        try:
+            mode = path.stat().st_mode & 0o7777
+        except FileNotFoundError:
+            umask = os.umask(0)
+            os.umask(umask)
+            mode = 0o666 & ~umask
+        os.fchmod(fd, mode)
         with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
             fh.write(text)
         os.replace(tmp, path)

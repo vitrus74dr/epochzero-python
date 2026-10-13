@@ -59,3 +59,18 @@ export const checkItem = (item: string, checked: boolean) =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ item, checked }),
   })
+
+export type TreeNode = { name: string; path: string; type: 'file' | 'dir'; children?: TreeNode[] }
+export type FileData = { path: string; content: string; version: string }
+
+export const getTree = () => call<{ root: string; children: TreeNode[] }>('/api/files/tree')
+
+export const readFile = (path: string) =>
+  call<FileData>(`/api/files?path=${encodeURIComponent(path)}`)
+
+export const writeFile = (path: string, content: string, baseVersion: string | null, force = false) =>
+  call<{ path: string; version: string }>(`/api/files?path=${encodeURIComponent(path)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content, base_version: baseVersion, force }),
+  })

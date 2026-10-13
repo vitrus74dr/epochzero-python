@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>EpochZero Python</title>
+    <script>
+      // Set data-theme before first paint so there is no flash of the wrong theme.
+      // Keep the storage key in sync with src/theme/theme.ts.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('epochzero.theme'); } catch (e) {}
+        if (t !== 'dark' && t !== 'light') {
+          t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-HuXswILD.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BTsU9tZt.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

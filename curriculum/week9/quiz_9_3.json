@@ -1,0 +1,42 @@
+{
+  "id": "W9.3.quiz",
+  "title": "Game loops, collisions and states",
+  "pass_mark": 4,
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "A sprite moves with `self.x += 5` in `on_update`. What happens on a 144 Hz monitor compared with a 60 Hz one?",
+      "choices": ["The same speed", "It moves 2.4× faster", "It moves 2.4× slower", "It stutters but averages the same speed"],
+      "answer": 1,
+      "explain": "`on_update` runs once per frame, so 144 frames a second means 144 × 5 px. Scale by `delta_time` (`x += speed * dt`) to make speed independent of frame rate."
+    },
+    {
+      "id": "q2",
+      "prompt": "A ball at 1,500 px/s sometimes passes straight through a 12 px paddle at 60 fps. What is this, and what's a fix?",
+      "choices": ["Aliasing: draw the ball bigger", "Tunnelling: move in smaller sub-steps and check collisions after each", "A rounding error: use integers", "Frame drop: call `on_draw` more often"],
+      "answer": 1,
+      "explain": "At 60 fps the ball moves 25 px per frame, more than the paddle's width, so it's never seen overlapping. Sub-steps make each move smaller than the thing it might hit."
+    },
+    {
+      "id": "q3",
+      "prompt": "A ball overlaps a brick by 3 px past its bottom edge and by 30 px past its left edge. Which side did it hit?",
+      "choices": ["Left", "Bottom", "Both, so flip vx and vy", "It's ambiguous"],
+      "answer": 1,
+      "explain": "The smallest penetration marks the edge the ball has only just crossed: the bottom. Being 30 px past the left edge means it was already well inside that range."
+    },
+    {
+      "id": "q4",
+      "prompt": "What does this print?\n\n```python\nTRANSITIONS = {(\"title\", \"space\"): \"playing\", (\"playing\", \"p\"): \"paused\"}\n\ndef next_state(state, event):\n    return TRANSITIONS.get((state, event), state)\n\nprint(next_state(\"title\", \"p\"))\n```",
+      "choices": ["`paused`", "`title`", "`None`", "A `KeyError`"],
+      "answer": 1,
+      "explain": "There's no `(\"title\", \"p\")` entry, so `.get` returns the default, the current state. Events that aren't allowed in a state do nothing."
+    },
+    {
+      "id": "q5",
+      "prompt": "Where should a `PhysicsEnginePlatformer.update()` call go, and why?",
+      "choices": ["`on_draw`, so physics matches what's drawn", "`on_update`, because it runs every frame", "`on_fixed_update`, because `update()` takes no `delta_time` and must run at a fixed rate", "`on_key_press`, so it only runs on input"],
+      "answer": 2,
+      "explain": "Each `update()` call applies one fixed step of movement and gravity. Calling it a fixed number of times per second (`on_fixed_update`) makes the game run at the same speed on every machine."
+    }
+  ]
+}

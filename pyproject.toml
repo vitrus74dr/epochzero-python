@@ -5,12 +5,15 @@ description = "Local-first Python curriculum cockpit"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.115",
+    "inquirer>=3.4.1",
     "ptyprocess>=0.7.0",
+    "rich>=15.0.0",
     "uvicorn[standard]>=0.32",
 ]
 
 [project.scripts]
 pygrid = "server.main:run"
+pygrid-quiz = "server.quiz_cli:main"
 
 [dependency-groups]
 dev = [

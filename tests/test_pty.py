@@ -123,3 +123,44 @@ def test_child_env_drops_app_venv(monkeypatch):
     assert "VIRTUAL_ENV" not in env
     assert env["PATH"] == "/usr/bin"
     assert env["TERM"] == "xterm-256color"
+
+
+def test_quiz_in_terminal_with_arrow_keys(client, paths, quiz):
+    from server.verifications import VerificationLog
+    DOWN, ENTER = "\x1b[B", "\r"
+
+    def send(data):
+        ws.send_text(json.dumps({"type": "input", "data": data}))
+
+    def until(needle):
+        # Play terminal: blessed (under inquirer) asks for the cursor position
+        # and waits for the reply, which xterm.js sends automatically.
+        out = ""
+        for _ in range(200):
+            msg = ws.receive()
+            chunk = (msg.get("bytes") or b"").decode(errors="replace")
+            for _ in range(chunk.count("\x1b[6n")):
+                send("\x1b[1;1R")
+            out += chunk
+            if needle in out:
+                return out
+        raise AssertionError(out)
+
+    with connect(client, mode="quiz", file="W1.2.quiz", cols=100, rows=30) as ws:
+        until("> True")
+        # q1: first choice is right. q2: one down. q3: one down.
+        send(ENTER)
+        until("  []")  # only q2 has this choice
+        send(DOWN + ENTER)
+        until("  'x'")  # only q3
+        send(DOWN + ENTER)
+        assert "[ PASS ]" in until("recorded for W1.2.b")
+    [rec] = VerificationLog(paths.verifications).read()
+    assert (rec.item, rec.kind, rec.passed, rec.by) == ("W1.2.b", "quiz", True, "cli")
+    assert rec.summary == "3/3 (pass 2)"
+
+
+def test_quiz_mode_rejects_bad_id(client):
+    with connect(client, mode="quiz", file="../../etc") as ws:
+        msg = json.loads(ws.receive_text())
+        assert msg["type"] == "error" and "quiz id" in msg["message"]

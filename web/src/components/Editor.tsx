@@ -18,14 +18,15 @@ type Props = {
   onChange: (content: string) => void
   onSave: () => void
   onRun: () => void
+  onRunTests: () => void
 }
 
 /** CodeMirror 6 editor. Remount (via key) to load a different file or a reloaded version. */
-export function Editor({ path, initial, onChange, onSave, onRun }: Props) {
+export function Editor({ path, initial, onChange, onSave, onRun, onRunTests }: Props) {
   const host = useRef<HTMLDivElement>(null)
   // Callbacks change every render; the editor reads them through refs.
-  const cb = useRef({ onChange, onSave, onRun })
-  cb.current = { onChange, onSave, onRun }
+  const cb = useRef({ onChange, onSave, onRun, onRunTests })
+  cb.current = { onChange, onSave, onRun, onRunTests }
 
   useEffect(() => {
     const themeSlot = new Compartment()
@@ -52,6 +53,8 @@ export function Editor({ path, initial, onChange, onSave, onRun }: Props) {
           Prec.highest(keymap.of([
             { key: 'Mod-s', preventDefault: true, run: () => { cb.current.onSave(); return true } },
             { key: 'Mod-Enter', preventDefault: true, run: () => { cb.current.onRun(); return true } },
+            { key: 'Mod-Shift-Enter', preventDefault: true, run: () => { cb.current.onRunTests(); return true } },
+            { key: 'Mod-Shift-t', preventDefault: true, run: () => { cb.current.onRunTests(); return true } },
           ])),
           keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap,
                      ...historyKeymap, ...completionKeymap, indentWithTab]),

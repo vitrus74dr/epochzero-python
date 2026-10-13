@@ -3,12 +3,14 @@ import { FitAddon } from '@xterm/addon-fit'
 import { Terminal as XTerm } from '@xterm/xterm'
 import '@xterm/xterm/css/xterm.css'
 import { xtermTheme } from '../theme/editorTheme'
+import { isRunTests } from '../keys'
 import { onThemeChange } from '../theme/theme'
 
 export type TermStatus = 'connecting' | 'running' | 'exited' | 'error'
 
 type Props = {
-  mode: 'shell' | 'run'
+  mode: 'shell' | 'run' | 'quiz'
+  /** Workspace path for 'run', quiz id for 'quiz'. */
   file?: string
   onStatus?: (s: TermStatus, detail?: string) => void
   active: boolean
@@ -42,6 +44,7 @@ export function Terminal({ mode, file, onStatus, active }: Props) {
     // Let app-level shortcuts through instead of sending them to the pty.
     term.attachCustomKeyEventHandler((e) => {
       const mod = e.ctrlKey || e.metaKey
+      if (isRunTests(e)) return false
       if (mod && e.key === 'Enter') return false
       if (mod && e.shiftKey && e.key.toLowerCase() === 'l') return false
       return true

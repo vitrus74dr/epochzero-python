@@ -12,12 +12,16 @@ source of truth for learner progress; never renumber or reword its item IDs.
 - `uv run pygrid --rebuild` rebuilds the UI first
 - Dev: `uv run pygrid --dev` (API only) + `pnpm -C web dev` (UI on :5173, proxies /api)
 - Tests: `capped -m 8G -- uv run pytest -q`; UI typecheck + build: `pnpm -C web build`
+- Terminal quiz: `uv run pygrid-quiz <quiz id>` (needs a real TTY; the cockpit runs it in its pty)
 
 ## Invariants
 - Bind 127.0.0.1 only. Every /api route (HTTP, SSE, WebSocket) goes through
   `GuardMiddleware` in `server/main.py`: Host/Origin allow-list + session cookie.
 - Ticking goes through `check_item()` in `server/tracker_api.py` (tracker lock + verification
   gate + week lock). Never write `[x]` into the tracker by any other route.
+- Which kind of record may verify an item is decided by `verify_kind()` in
+  `server/verifications.py`: a pytest run only records "pytest" items, a quiz only its
+  task's "Quiz:" item. Answers and explanations for missed questions never reach the browser.
 - Colours come from `web/src/theme/tokens.css` only. `tests/test_contrast.py` enforces
   WCAG AA on every text/surface pair; if you change a token, the test must still pass.
 - xterm.js and CodeMirror can't read CSS variables: build their themes from

@@ -30,7 +30,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from server import fs, pty_ws, tracker_api
+from server import fs, pty_ws, quizzes, tests_runner, tracker_api
 from server.paths import ROOT, Paths
 from server.watch import EventHub, watch_root
 
@@ -149,6 +149,8 @@ def create_app(*, token: str, port: int = DEFAULT_PORT, dev: bool = False,
     app.include_router(tracker_api.router(paths))
     app.include_router(fs.router(paths))
     app.include_router(pty_ws.router(paths))
+    app.include_router(tests_runner.router(paths))
+    app.include_router(quizzes.router(paths))
 
     if dist.is_dir():
         app.mount("/", StaticFiles(directory=dist, html=True), name="web")

@@ -1,23 +1,27 @@
 import { useEffect, useState } from 'react'
 
-export type View = 'dashboard' | 'workbench'
+export type View = 'dashboard' | 'workbench' | 'quiz'
+/** `file` is a workspace path for the workbench and a quiz id for the quiz view. */
 export type Route = { view: View; file: string | null }
 
 // #/            -> dashboard
 // #/workbench   -> workbench
 // #/workbench/week1/calc.py -> workbench with a file open
+// #/quiz, #/quiz/W1.2.quiz  -> quiz list, or one quiz
 export function parseHash(hash: string): Route {
   const h = hash.replace(/^#\/?/, '')
-  if (h === 'workbench' || h.startsWith('workbench/')) {
-    const file = h.slice('workbench/'.length)
-    return { view: 'workbench', file: h.includes('/') && file ? decodeURIComponent(file) : null }
+  for (const view of ['workbench', 'quiz'] as const) {
+    if (h === view || h.startsWith(`${view}/`)) {
+      const file = h.slice(view.length + 1)
+      return { view, file: file ? decodeURIComponent(file) : null }
+    }
   }
   return { view: 'dashboard', file: null }
 }
 
 export function hrefFor(view: View, file?: string | null): string {
   if (view === 'dashboard') return '#/'
-  return file ? `#/workbench/${file.split('/').map(encodeURIComponent).join('/')}` : '#/workbench'
+  return file ? `#/${view}/${file.split('/').map(encodeURIComponent).join('/')}` : `#/${view}`
 }
 
 export function navigate(view: View, file?: string | null): void {

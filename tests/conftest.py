@@ -1,3 +1,4 @@
+import json
 import shutil
 from pathlib import Path
 
@@ -26,3 +27,26 @@ def client(paths) -> TestClient:
     c = TestClient(app, base_url=f"http://{HOST}")
     assert c.post("/api/session", json={"token": TOKEN}).status_code == 204
     return c
+
+
+QUIZ = {
+    "id": "W1.2.quiz",
+    "title": "Boolean logic",
+    "pass_mark": 2,
+    "questions": [
+        {"id": "q1", "prompt": "`not (True and False)`?", "choices": ["True", "False"],
+         "answer": 0, "explain": "and is False, not flips it"},
+        {"id": "q2", "prompt": "`bool([])`?", "choices": ["True", "False", "[]"],
+         "answer": 1, "explain": "empty containers are falsy"},
+        {"id": "q3", "prompt": "`0 or 'x'`?", "choices": ["0", "'x'", "True"],
+         "answer": 1, "explain": "or returns the first truthy operand"},
+    ],
+}
+
+
+@pytest.fixture
+def quiz(paths) -> dict:
+    d = paths.curriculum / "week1"
+    d.mkdir(parents=True)
+    (d / "quiz_1_2.json").write_text(json.dumps(QUIZ), encoding="utf-8")
+    return QUIZ

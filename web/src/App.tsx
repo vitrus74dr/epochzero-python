@@ -8,7 +8,9 @@ import { isTyping, mod } from './keys'
 import { hrefFor, navigate, useRoute } from './router'
 import { toggleTheme } from './theme/theme'
 import { useTracker } from './useTracker'
+import type { TestResult } from './types'
 import { Dashboard } from './views/Dashboard'
+import { QuizView } from './views/Quiz'
 import { Workbench } from './views/Workbench'
 
 const SESSION_TEXT: Record<SessionState, { text: string; tone: 'ok' | 'bad' }> = {
@@ -24,9 +26,12 @@ export default function App() {
   const live = useLive()
   const route = useRoute()
   const [sheet, setSheet] = useState(false)
-  // Keep the workbench (and its shell) alive once visited.
+  const [tests, setTests] = useState<TestResult | null>(null)
+  // Keep the workbench (and its shell) alive once visited, on its last file.
   const [workbenchMounted, setWorkbenchMounted] = useState(false)
+  const [workbenchFile, setWorkbenchFile] = useState<string | null>(null)
   if (route.view === 'workbench' && !workbenchMounted && ready) setWorkbenchMounted(true)
+  if (route.view === 'workbench' && route.file && route.file !== workbenchFile) setWorkbenchFile(route.file)
 
   useEffect(() => {
     initSession().then((s) => {
@@ -48,7 +53,8 @@ export default function App() {
         window.clearTimeout(chord.current)
         chord.current = null
         if (e.key === 'd') navigate('dashboard')
-        else if (e.key === 'w') navigate('workbench', route.file)
+        else if (e.key === 'w') navigate('workbench', workbenchFile)
+        else if (e.key === 'q') navigate('quiz')
         return
       }
       if (e.key === 'g') {
@@ -59,14 +65,19 @@ export default function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [route.file])
+  }, [workbenchFile])
 
   const cur = data?.current
   const crumbs = cur
     ? [cur.week ? `W${cur.week}` : 'DONE', ...(cur.task ? [`T${cur.task}`] : []), cur.task_title]
     : []
+  const testsSegment = tests && {
+    text: `tests ${tests.counts.passed}/${tests.tests.length}`,
+    tone: tests.passed ? 'ok' as const : 'bad' as const,
+  }
   const segments = ready
-    ? [live ? { text: '● live', tone: 'ok' as const } : { text: '○ reconnecting', tone: 'bad' as const }]
+    ? [...(testsSegment ? [testsSegment] : []),
+       live ? { text: '● live', tone: 'ok' as const } : { text: '○ reconnecting', tone: 'bad' as const }]
     : session ? [SESSION_TEXT[session]] : []
   const onWorkbench = route.view === 'workbench'
 
@@ -76,10 +87,12 @@ export default function App() {
         <header className="topbar">
           <h1>PYGRID</h1>
           <nav className="nav" aria-label="Views">
-            <a href={hrefFor('dashboard')} className={!onWorkbench ? 'is-on' : ''}
+            <a href={hrefFor('dashboard')} className={route.view === 'dashboard' ? 'is-on' : ''}
                title="g d">dashboard</a>
-            <a href={hrefFor('workbench', route.file)} className={onWorkbench ? 'is-on' : ''}
+            <a href={hrefFor('workbench', workbenchFile)} className={onWorkbench ? 'is-on' : ''}
                title="g w">workbench</a>
+            <a href={hrefFor('quiz')} className={route.view === 'quiz' ? 'is-on' : ''}
+               title="g q">quiz</a>
           </nav>
           <button className="link" onClick={() => setSheet(true)} title="Keyboard shortcuts">?</button>
         </header>
@@ -94,8 +107,10 @@ export default function App() {
           <p className="banner" role="alert"><Tag kind="fail">tracker</Tag> {error}</p>
         )}
 
-        {!onWorkbench && data && <Dashboard data={data} onUpdate={setData} />}
-        {workbenchMounted && <Workbench file={route.file} visible={onWorkbench} />}
+        {route.view === 'dashboard' && data && <Dashboard data={data} onUpdate={setData} />}
+        {route.view === 'quiz' && ready && <QuizView quizId={route.file} />}
+        {workbenchMounted && <Workbench file={workbenchFile} visible={onWorkbench}
+                                        tracker={data} onTestResult={setTests} />}
       </main>
 
       <StatusBar crumbs={crumbs} segments={segments} />

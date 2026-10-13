@@ -29,3 +29,11 @@ class Paths:
     @property
     def workspace(self) -> Path:
         return self.root / "workspace"
+
+    @property
+    def curriculum(self) -> Path:
+        return self.root / "curriculum"
+
+    @property
+    def quiz_results(self) -> Path:
+        return self.progress / "quizzes"

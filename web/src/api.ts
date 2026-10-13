@@ -1,4 +1,4 @@
-import type { TrackerData } from './types'
+import type { QuizList, QuizResult, QuizSpec, TestEvent, TrackerData } from './types'
 
 export type SessionState = 'ok' | 'expired' | 'offline'
 
@@ -74,3 +74,52 @@ export const writeFile = (path: string, content: string, baseVersion: string | n
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content, base_version: baseVersion, force }),
   })
+
+export const getQuizzes = () => call<QuizList>('/api/quizzes')
+
+export const getQuiz = (id: string) => call<QuizSpec>(`/api/quizzes/${encodeURIComponent(id)}`)
+
+export const submitQuiz = (id: string, answers: Record<string, number>) =>
+  call<QuizResult>(`/api/quizzes/${encodeURIComponent(id)}/submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers }),
+  })
+
+/** POST /api/tests/run and feed each NDJSON event to onEvent as it arrives.
+ *  Resolves once the stream ends; a refusal (409 etc.) comes back as an error. */
+export async function runTests(path: string, item: string | null,
+                               onEvent: (e: TestEvent) => void): Promise<Result<null>> {
+  let res: Response
+  try {
+    res = await fetch('/api/tests/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path, item }),
+    })
+  } catch {
+    return { ok: false, status: 0, error: 'API offline' }
+  }
+  if (!res.ok || !res.body) {
+    const body = await res.json().catch(() => ({}))
+    return { ok: false, status: res.status, error: body.detail ?? res.statusText }
+  }
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader()
+  let buf = ''
+  try {
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buf += value
+      let nl
+      while ((nl = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, nl)
+        buf = buf.slice(nl + 1)
+        if (line) onEvent(JSON.parse(line) as TestEvent)
+      }
+    }
+  } catch {
+    return { ok: false, status: 0, error: 'test run interrupted' }
+  }
+  return { ok: true, data: null }
+}

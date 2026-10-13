@@ -12,6 +12,7 @@ exists). JSONL rather than a JSON array so appending never rewrites the file.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
@@ -21,6 +22,22 @@ from pydantic import BaseModel
 from server.tracker import locked
 
 Kind = Literal["pytest", "quiz", "tutor", "artifact"]
+
+# "pytest" or a whole-word "test(s)", but not train_test_split or "testable".
+TESTS_RE = re.compile(r"pytest|\btests?\b", re.IGNORECASE)
+
+
+def verify_kind(text: str) -> Kind:
+    """Which kind of record can verify a tracker item, judged from its text.
+    A pytest run may only verify "pytest" items and a quiz only "quiz" items;
+    everything else is a tutor or artifact check (recorded by Claude Code)."""
+    if text.startswith("Quiz:"):
+        return "quiz"
+    if text.startswith("Verification:") or TESTS_RE.search(text):
+        return "pytest"
+    if "`implementation_plan.md`" in text or "`walkthrough.md`" in text:
+        return "artifact"
+    return "tutor"
 
 
 class Record(BaseModel):

@@ -1,7 +1,7 @@
 """File watching -> in-process event hub -> SSE (GET /api/events).
 
 Pushes a small JSON event whenever the tracker, the verification log, quiz
-results or workspace files change, so edits made by Claude Code in the
+results, curriculum files (lessons, quiz specs) or workspace files change, so edits made by Claude Code in the
 terminal show up in the browser without a refresh.
 """
 
@@ -61,15 +61,18 @@ def classify(path: Path, root: Path) -> str | None:
         return None
     if parts[0] == "workspace":
         return "workspace"
+    if parts[0] == "curriculum":
+        return "curriculum"
     return None
 
 
 async def watch_root(root: Path, hub: EventHub, stop: asyncio.Event) -> None:
-    """Watch the repo root (non-recursive, for the tracker) plus progress/
-    and workspace/ recursively. Not the whole repo: node_modules and .venv
+    """Watch the repo root (non-recursive, for the tracker) plus progress/,
+    workspace/ and curriculum/ recursively. Not the whole repo: node_modules and .venv
     would cost thousands of inotify watches."""
     (root / "progress").mkdir(exist_ok=True)
     (root / "workspace").mkdir(exist_ok=True)
+    (root / "curriculum").mkdir(exist_ok=True)
 
     async def run(paths: list[Path], recursive: bool) -> None:
         async for changes in awatch(*paths, recursive=recursive, stop_event=stop,
@@ -84,5 +87,5 @@ async def watch_root(root: Path, hub: EventHub, stop: asyncio.Event) -> None:
 
     await asyncio.gather(
         run([root], recursive=False),
-        run([root / "progress", root / "workspace"], recursive=True),
+        run([root / "progress", root / "workspace", root / "curriculum"], recursive=True),
     )

@@ -23,6 +23,7 @@ import json
 import os
 import shutil
 import signal
+import sys
 from pathlib import Path
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -30,6 +31,7 @@ from ptyprocess import PtyProcess
 
 from server.fs import SandboxError, resolve_in
 from server.paths import ROOT, Paths
+from server.quizzes import QUIZ_ID_RE
 
 MAX_PTYS = 8
 READ_CHUNK = 65536
@@ -54,10 +56,16 @@ def child_env() -> dict[str, str]:
 
 
 def command_for(paths: Paths, mode: str, file: str | None) -> tuple[list[str], Path]:
-    """argv and cwd for a terminal session."""
+    """argv and cwd for a terminal session. `file` is a workspace path for
+    mode "run" and a quiz id for mode "quiz"."""
     ws = paths.workspace.resolve()
     if mode == "shell":
         return [os.environ.get("SHELL") or "/bin/bash"], ws
+    if mode == "quiz":
+        # The quiz runner is part of the app, so it runs on the app's Python.
+        if not file or not QUIZ_ID_RE.match(file):
+            raise SpawnError("quiz needs a quiz id like W1.2.quiz")
+        return [sys.executable, "-m", "server.quiz_cli", file, "--root", str(paths.root)], ws
     if mode != "run":
         raise SpawnError(f"unknown mode {mode!r}")
     if not file:
@@ -68,14 +76,21 @@ def command_for(paths: Paths, mode: str, file: str | None) -> tuple[list[str], P
         raise SpawnError(str(e)) from None
     if target.suffix != ".py" or not target.is_file():
         raise SpawnError(f"{file} is not a Python file in workspace/")
-    # A workspace uv project (set up by the learner in W1.1.a) wins, so its
-    # dependencies (rich, inquirer, arcade...) are available.
-    uv = shutil.which("uv", path=child_env()["PATH"])
-    if (ws / "pyproject.toml").is_file() and uv:
-        argv = [uv, "run", "--project", str(ws), "python", target.name]
-    else:
-        argv = [shutil.which("python3", path=child_env()["PATH"]) or "python3", target.name]
-    return argv, target.parent
+    return learner_python(ws, target.parent) + [target.name], target.parent
+
+
+def learner_python(ws: Path, start: Path) -> list[str]:
+    """argv prefix for the learner's Python. The nearest uv project between
+    `start` and workspace/ (set up by the learner in W1.1.a) wins, so its
+    dependencies (rich, inquirer, arcade, pytest...) are available."""
+    path = child_env()["PATH"]
+    uv = shutil.which("uv", path=path)
+    for d in [start, *start.parents]:
+        if uv and (d / "pyproject.toml").is_file():
+            return [uv, "run", "--project", str(d), "python"]
+        if d == ws:
+            break
+    return [shutil.which("python3", path=path) or "python3"]
 
 
 def stop_process(proc: PtyProcess) -> None:

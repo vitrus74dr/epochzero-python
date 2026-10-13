@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from server import tracker as tr
 from server.paths import Paths
-from server.verifications import VerificationLog
+from server.verifications import VerificationLog, verify_kind
 
 RECENT = 6
 
@@ -42,7 +42,8 @@ def check_item(paths: Paths, item_id: str, checked: bool = True) -> tr.Tracker:
 
 
 def item_json(i: tr.Item, verified: set[str]) -> dict:
-    return {"id": i.id, "text": i.text, "checked": i.checked, "verified": i.id in verified}
+    return {"id": i.id, "text": i.text, "checked": i.checked, "verified": i.id in verified,
+            "verify": verify_kind(i.text)}
 
 
 def tracker_json(t: tr.Tracker, log: VerificationLog) -> dict:

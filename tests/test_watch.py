@@ -12,6 +12,7 @@ from server.watch import EventHub, classify, watch_root
     ("progress/verifications.jsonl", "verifications"),
     ("progress/quizzes/W1.2.quiz.json", "quizzes"),
     ("workspace/week1/calc.py", "workspace"),
+    ("curriculum/week1/quiz_1_2.json", "curriculum"),
     ("progress/.tracker.lock", None),
     (".CURRICULUM_TRACKER.md.abc.tmp", None),
     ("workspace/week1/__pycache__/calc.cpython-312.pyc", None),

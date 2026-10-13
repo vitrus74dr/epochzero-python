@@ -1,35 +1,63 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Group, Panel as Pane, Separator } from 'react-resizable-panels'
-import { getTree, readFile, writeFile, type TreeNode } from '../api'
+import { getTree, readFile, runTests, writeFile, type TreeNode } from '../api'
 import { Editor } from '../components/Editor'
 import { FileTree } from '../components/FileTree'
 import { Panel } from '../components/Panel'
 import { Tag } from '../components/Tag'
 import { Terminal, type TermStatus } from '../components/Terminal'
+import { TestResults, type TestRun } from '../components/TestResults'
 import { onServerEvent } from '../events'
-import { mod } from '../keys'
+import { isRunTests, mod } from '../keys'
 import { navigate } from '../router'
+import type { Item, TestResult, TrackerData } from '../types'
 
 type OpenFile = { path: string; base: string; version: string; loadId: number }
 type Conflict = null | 'disk' | 'save'
 
-type Props = { file: string | null; visible: boolean }
+type Props = {
+  file: string | null
+  visible: boolean
+  tracker: TrackerData | null
+  onTestResult: (r: TestResult | null) => void
+}
 
-export function Workbench({ file: routeFile, visible }: Props) {
+type Tab = 'shell' | 'run' | 'tests'
+
+/** Items a pytest run may verify: pytest items in unlocked weeks. */
+function pytestItems(t: TrackerData | null): Item[] {
+  if (!t) return []
+  return t.weeks.filter((w) => w.unlocked)
+    .flatMap((w) => w.tasks.flatMap((task) => task.items))
+    .filter((i) => i.verify === 'pytest')
+}
+
+const dirOf = (path: string) => path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '.'
+
+export function Workbench({ file: routeFile, visible, tracker, onTestResult }: Props) {
   const [tree, setTree] = useState<TreeNode[]>([])
   const [open, setOpen] = useState<OpenFile | null>(null)
   const [draft, setDraft] = useState('')
   const [conflict, setConflict] = useState<Conflict>(null)
   const [notice, setNotice] = useState<string | null>(null)
-  const [tab, setTab] = useState<'shell' | 'run'>('shell')
+  const [tab, setTab] = useState<Tab>('shell')
   const [shellKey, setShellKey] = useState(0)
   const [run, setRun] = useState<{ key: number; file: string } | null>(null)
   const [termStatus, setTermStatus] = useState<Record<string, string>>({})
+  const [testRun, setTestRun] = useState<TestRun | null>(null)
+  // null = follow the tracker's current item (if it's a pytest item).
+  const [testItem, setTestItem] = useState<string | null>(null)
+
+  const eligible = pytestItems(tracker)
+  const cur = tracker?.current?.item
+  const defaultItem = cur && eligible.some((i) => i.id === cur.id) ? cur.id : ''
+  const chosenItem = testItem ?? defaultItem
+  const testTarget = open ? dirOf(open.path) : null
 
   const dirty = open !== null && draft !== open.base
   // Event handlers registered once need the latest state.
-  const state = useRef({ open, dirty, draft })
-  state.current = { open, dirty, draft }
+  const state = useRef({ open, dirty, draft, testTarget, chosenItem, testRun })
+  state.current = { open, dirty, draft, testTarget, chosenItem, testRun }
 
   const refreshTree = useCallback(async () => {
     const r = await getTree()
@@ -102,17 +130,37 @@ export function Workbench({ file: routeFile, visible }: Props) {
     setTab('run')
   }, [save])
 
-  // Ctrl/Cmd+S and Ctrl/Cmd+Enter outside the editor (the editor handles its own).
+  const runTestsNow = useCallback(async () => {
+    const { testTarget: target, chosenItem: item, testRun: prev } = state.current
+    if (!target || prev?.running) return
+    if (state.current.dirty && !(await save())) return
+    setTab('tests')
+    const run: TestRun = { target, item: item || null, running: true, output: '', result: null, error: null }
+    setTestRun(run)
+    onTestResult(null)
+    const r = await runTests(target, item || null, (e) => {
+      if (e.type === 'output') run.output += e.data
+      else if (e.type === 'result') {
+        run.result = e
+        onTestResult(e)
+      }
+      setTestRun({ ...run })
+    })
+    setTestRun({ ...run, running: false, error: r.ok ? (run.result ? null : 'no result') : r.error })
+  }, [save, onTestResult])
+
+  // Ctrl/Cmd+S, Ctrl/Cmd+Enter and run-tests outside the editor (the editor handles its own).
   useEffect(() => {
     if (!visible) return
     const on = (e: KeyboardEvent) => {
       if (e.defaultPrevented || !mod(e)) return
-      if (e.key === 'Enter') { e.preventDefault(); runCurrent() }
+      if (isRunTests(e)) { e.preventDefault(); runTestsNow() }
+      else if (e.key === 'Enter') { e.preventDefault(); runCurrent() }
       else if (e.key.toLowerCase() === 's' && !e.shiftKey) { e.preventDefault(); save() }
     }
     window.addEventListener('keydown', on)
     return () => window.removeEventListener('keydown', on)
-  }, [visible, runCurrent, save])
+  }, [visible, runCurrent, runTestsNow, save])
 
   const newFile = async () => {
     const path = window.prompt('New file (path inside workspace/):', 'week1/')
@@ -163,7 +211,8 @@ export function Workbench({ file: routeFile, visible }: Props) {
                 {notice && <div className="wb-banner muted">{notice}</div>}
                 {open ? (
                   <Editor key={`${open.path}:${open.loadId}`} path={open.path} initial={open.base}
-                          onChange={setDraft} onSave={() => save()} onRun={runCurrent} />
+                          onChange={setDraft} onSave={() => save()} onRun={runCurrent}
+                          onRunTests={runTestsNow} />
                 ) : (
                   <p className="muted wb-empty">Pick a file on the left, or [ + new ].</p>
                 )}
@@ -171,8 +220,10 @@ export function Workbench({ file: routeFile, visible }: Props) {
             </Pane>
             <Separator className="wb-sep wb-sep-h" />
             <Pane minSize={80} className="wb-pane">
-              <Panel title="Terminal" className="wb-panel wb-term"
-                     meta={termStatus[tab === 'shell' ? `shell${shellKey}` : `run${run?.key}`]}
+              <Panel title={tab === 'tests' ? 'Tests' : 'Terminal'} className="wb-panel wb-term"
+                     meta={tab === 'tests'
+                       ? testRun?.result?.summary ?? (testRun?.running ? 'running' : undefined)
+                       : termStatus[tab === 'shell' ? `shell${shellKey}` : `run${run?.key}`]}
                      actions={
                        <>
                          <button className={`hdr-tab ${tab === 'shell' ? 'is-on' : ''}`}
@@ -181,10 +232,16 @@ export function Workbench({ file: routeFile, visible }: Props) {
                                  onClick={() => setTab('run')} disabled={!run}>
                            run{run ? `: ${run.file.split('/').pop()}` : ''}
                          </button>
-                         <button className="hdr-btn" title="Restart this terminal"
-                                 onClick={() => tab === 'shell'
-                                   ? setShellKey((k) => k + 1)
-                                   : runCurrent()}>[ restart ]</button>
+                         <button className={`hdr-tab ${tab === 'tests' ? 'is-on' : ''}`}
+                                 onClick={() => setTab('tests')}>
+                           tests{testRun?.result ? ` ${testRun.result.counts.passed}/${testRun.result.tests.length}` : ''}
+                         </button>
+                         {tab !== 'tests' && (
+                           <button className="hdr-btn" title="Restart this terminal"
+                                   onClick={() => tab === 'shell'
+                                     ? setShellKey((k) => k + 1)
+                                     : runCurrent()}>[ restart ]</button>
+                         )}
                        </>
                      }>
                 <Terminal key={`shell${shellKey}`} mode="shell" active={tab === 'shell' && visible}
@@ -192,6 +249,10 @@ export function Workbench({ file: routeFile, visible }: Props) {
                 {run && (
                   <Terminal key={`run${run.key}`} mode="run" file={run.file}
                             active={tab === 'run' && visible} onStatus={status(`run${run.key}`)} />
+                )}
+                {tab === 'tests' && (
+                  <TestResults target={testTarget} items={eligible} item={chosenItem}
+                               onItem={setTestItem} run={testRun} onRun={runTestsNow} />
                 )}
               </Panel>
             </Pane>

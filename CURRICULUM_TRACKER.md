@@ -4,7 +4,7 @@ Source of truth for curriculum state. Read at the start of every session.
 
 ## Rules
 - Item IDs (`[W1.1.a]`) are stable. Never renumber or reword an ID.
-- An item may be ticked **only** when `progress/verifications.json` has a passing record for it (pytest run, quiz score ≥ pass mark, or a recorded tutor check).
+- An item may be ticked **only** when `progress/verifications.jsonl` has a passing record for it (pytest run, quiz score ≥ pass mark, or a recorded tutor check).
 - `[PROJECT]` tasks require `implementation_plan.md` (after `/grill-me`) before coding, and `walkthrough.md` after.
 - A week unlocks only when every item in the previous week is ticked.
 - Before writing any Arcade or scikit-learn lesson code, check the installed version's official docs.

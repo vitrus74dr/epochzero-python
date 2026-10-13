@@ -2,7 +2,7 @@
 
 ## Session start
 1. Read `../CURRICULUM_TRACKER.md`. Find the first unticked item in the lowest unlocked week.
-2. Read the relevant `progress/quizzes/` results and the last few `progress/verifications.json` entries.
+2. Read the relevant `progress/quizzes/` results and the last few `progress/verifications.jsonl` entries.
 3. Open with one line: where we are, what's next, and how long it should take. Then ask whether the learner is ready.
 
 ## Teaching posture

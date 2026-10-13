@@ -10,6 +10,7 @@ The cookie is obtained by POSTing the token from the launch URL to
 from __future__ import annotations
 
 import argparse
+import asyncio
 import hmac
 import secrets
 import shutil
@@ -18,17 +19,21 @@ import subprocess
 import sys
 import threading
 import webbrowser
+from contextlib import asynccontextmanager
 from http.cookies import SimpleCookie
 from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Response
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-ROOT = Path(__file__).resolve().parent.parent
+from server import tracker_api
+from server.paths import ROOT, Paths
+from server.watch import EventHub, watch_root
+
 WEB = ROOT / "web"
 DIST = WEB / "dist"
 DEFAULT_PORT = 8765
@@ -108,8 +113,22 @@ class SessionRequest(BaseModel):
 
 
 def create_app(*, token: str, port: int = DEFAULT_PORT, dev: bool = False,
-               dist: Path = DIST) -> FastAPI:
-    app = FastAPI(title="PYGRID", docs_url=None, redoc_url=None, openapi_url=None)
+               dist: Path = DIST, root: Path = ROOT, watch: bool = True) -> FastAPI:
+    paths = Paths(root)
+    hub = EventHub()
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        stop = asyncio.Event()
+        task = asyncio.create_task(watch_root(root, hub, stop)) if watch else None
+        yield
+        stop.set()
+        if task:
+            await task
+
+    app = FastAPI(title="PYGRID", docs_url=None, redoc_url=None, openapi_url=None,
+                  lifespan=lifespan)
+    app.state.hub = hub
 
     @app.post("/api/session", status_code=204)
     def open_session(body: SessionRequest, response: Response) -> None:
@@ -120,7 +139,14 @@ def create_app(*, token: str, port: int = DEFAULT_PORT, dev: bool = False,
 
     @app.get("/api/status")
     def status() -> dict:
-        return {"app": "pygrid", "version": "0.1.0", "root": str(ROOT)}
+        return {"app": "pygrid", "version": "0.1.0", "root": str(root)}
+
+    @app.get("/api/events")
+    def events() -> StreamingResponse:
+        return StreamingResponse(hub.stream(), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-store"})
+
+    app.include_router(tracker_api.router(paths))
 
     if dist.is_dir():
         app.mount("/", StaticFiles(directory=dist, html=True), name="web")
@@ -160,6 +186,8 @@ def run() -> None:
                         help="API only; open the Vite dev server (pnpm -C web dev) instead")
     parser.add_argument("--rebuild", action="store_true", help="rebuild web/dist first")
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument("--root", type=Path, default=ROOT,
+                        help="directory holding CURRICULUM_TRACKER.md, progress/, workspace/")
     args = parser.parse_args()
 
     if not args.dev and (args.rebuild or not DIST.is_dir()):
@@ -174,7 +202,7 @@ def run() -> None:
     token = secrets.token_urlsafe(32)
     ui_port = VITE_PORT if args.dev else args.port
     url = f"http://127.0.0.1:{ui_port}/?token={token}"
-    app = create_app(token=token, port=args.port, dev=args.dev)
+    app = create_app(token=token, port=args.port, dev=args.dev, root=args.root.resolve())
 
     print(f"PYGRID ▸ {url}", flush=True)
     print("PYGRID ▸ bound to 127.0.0.1 only. Learner code runs as you; it is not sandboxed.",
@@ -183,7 +211,9 @@ def run() -> None:
         threading.Timer(1.0, webbrowser.open, [url]).start()
 
     # Never 0.0.0.0: this app executes arbitrary code.
-    uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")
+    # The graceful-shutdown timeout stops open SSE streams from blocking Ctrl+C.
+    uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning",
+                timeout_graceful_shutdown=1)
 
 
 if __name__ == "__main__":

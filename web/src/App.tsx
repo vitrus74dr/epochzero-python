@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { initSession, type SessionState } from './api'
-import { Cursor } from './components/Cursor'
-import { Panel } from './components/Panel'
-import { Progress } from './components/Progress'
 import { StatusBar } from './components/StatusBar'
 import { Tag } from './components/Tag'
 import { toggleTheme } from './theme/theme'
+import { useTracker } from './useTracker'
+import { Dashboard } from './views/Dashboard'
 
 const SESSION_TEXT: Record<SessionState, { text: string; tone: 'ok' | 'bad' }> = {
   ok: { text: 'api ok', tone: 'ok' },
@@ -15,6 +14,7 @@ const SESSION_TEXT: Record<SessionState, { text: string; tone: 'ok' | 'bad' }> =
 
 export default function App() {
   const [session, setSession] = useState<SessionState | null>(null)
+  const { data, setData, error, live } = useTracker(session === 'ok')
 
   useEffect(() => {
     initSession().then(setSession)
@@ -31,60 +31,33 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  const cur = data?.current
+  const crumbs = cur
+    ? [cur.week ? `W${cur.week}` : 'DONE', ...(cur.task ? [`T${cur.task}`] : []), cur.task_title]
+    : []
+  const segments = session === 'ok'
+    ? [live ? { text: '● live', tone: 'ok' as const } : { text: '○ reconnecting', tone: 'bad' as const }]
+    : session ? [SESSION_TEXT[session]] : []
+
   return (
     <div className="app">
       <main className="app-main">
-        <h1>PYGRID <span className="muted">· curriculum cockpit</span></h1>
+        <h1>PYGRID <span className="muted">· dashboard</span></h1>
 
         {session === 'expired' && (
-          <p className="tag tag--fail">
-            Session expired. Open the URL printed by `uv run pygrid`.
-          </p>
+          <p className="banner"><Tag kind="fail">session</Tag> Expired. Open the URL printed by `uv run pygrid`.</p>
+        )}
+        {session === 'offline' && (
+          <p className="banner"><Tag kind="fail">offline</Tag> Can't reach the PYGRID server.</p>
+        )}
+        {error && (
+          <p className="banner" role="alert"><Tag kind="fail">tracker</Tag> {error}</p>
         )}
 
-        <div className="specimen">
-          <Panel title="System" meta="phase 1">
-            <p>
-              <span className="muted">$</span> uv run pygrid <Cursor />
-            </p>
-            <p className="muted">
-              Bound to 127.0.0.1. Tracker, workbench and quizzes arrive in later phases.
-            </p>
-          </Panel>
-
-          <Panel title="Components" meta="tags · progress">
-            <p className="row">
-              <Tag kind="pass" /> <Tag kind="fail" /> <Tag kind="locked" />{' '}
-              <Tag kind="quiz" /> <Tag kind="project" />
-            </p>
-            <p><span className="muted">W1</span> <Progress value={0.5} /></p>
-            <p><span className="muted">W2</span> <Progress value={0.125} /></p>
-            <p><span className="muted">W3</span> <Progress value={0} /> <Tag kind="locked" /></p>
-            <p>
-              <span style={{ color: 'var(--accent)' }}>[x]</span> [W1.1.a] Set up the environment
-              <br />
-              <span>[ ]</span> <span style={{ color: 'var(--accent-2)' }}>[W1.1.b]</span> Greet the user with an f-string
-            </p>
-          </Panel>
-
-          <Panel title="Lesson" meta="prose specimen" className="span-2">
-            <h2>Control flow</h2>
-            <div className="prose">
-              <p>
-                An <code>if</code> statement runs its block only when the condition is
-                truthy. Python treats <code>0</code>, <code>""</code>, <code>[]</code> and{' '}
-                <code>None</code> as falsy, so <code>if items:</code> reads as
-                "if there is anything in the list".
-              </p>
-            </div>
-          </Panel>
-        </div>
+        {data && <Dashboard data={data} onUpdate={setData} />}
       </main>
 
-      <StatusBar
-        crumbs={['W1', 'T1.1', 'environment']}
-        segments={session ? [SESSION_TEXT[session]] : []}
-      />
+      <StatusBar crumbs={crumbs} segments={segments} />
     </div>
   )
 }

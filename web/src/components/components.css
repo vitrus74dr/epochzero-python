@@ -51,6 +51,9 @@
 
 /* ── Progress ──────────────────────────────────────────── */
 .progress { white-space: pre; }
+/* JetBrains Mono has no ▰▱; the fallback glyphs render thin, so size them up
+   while keeping the line height of the surrounding text. */
+.progress-on, .progress-off { font-size: 1.2em; line-height: 1; letter-spacing: -0.05em; }
 .progress-on  { color: var(--accent); }
 .progress-off { color: var(--text-muted); }
 
@@ -85,3 +88,28 @@
 .statusbar-toggle:hover { color: var(--accent); }
 .statusbar-ok { color: var(--success); }
 .statusbar-bad { color: var(--danger); }
+
+/* ── Inline code ───────────────────────────────────────── */
+.inline-code {
+  font-size: 0.92em;
+  background: var(--surface-2);
+  padding: 0 3px;
+}
+
+/* ── Checklist ─────────────────────────────────────────── */
+.checklist { list-style: none; margin: 0; padding: 0; }
+.checklist li {
+  display: grid;
+  grid-template-columns: 3ch 9ch 1fr;
+  gap: 1ch;
+  padding: 3px 0;
+  align-items: baseline;
+}
+.checklist-box { color: var(--text-muted); white-space: pre; }
+.checklist-box:disabled { cursor: not-allowed; }
+.checklist-box.is-checked { color: var(--accent); }
+.checklist-box.is-ready { color: var(--accent); }
+.checklist-box.is-ready:hover, .checklist-box.is-checked:hover { color: var(--accent-2); }
+.checklist-id { color: var(--text-muted); }
+.checklist-current .checklist-id { color: var(--accent-2); }
+.checklist li:has(.is-checked) .checklist-text { color: var(--text-muted); }

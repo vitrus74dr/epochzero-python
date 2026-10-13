@@ -16,6 +16,8 @@ source of truth for learner progress; never renumber or reword its item IDs.
 ## Invariants
 - Bind 127.0.0.1 only. Every /api route (HTTP, SSE, WebSocket) goes through
   `GuardMiddleware` in `server/main.py`: Host/Origin allow-list + session cookie.
+- Ticking goes through `check_item()` in `server/tracker_api.py` (tracker lock + verification
+  gate + week lock). Never write `[x]` into the tracker by any other route.
 - Colours come from `web/src/theme/tokens.css` only. `tests/test_contrast.py` enforces
   WCAG AA on every text/surface pair; if you change a token, the test must still pass.
 - xterm.js and CodeMirror can't read CSS variables: build their themes from

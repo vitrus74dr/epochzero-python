@@ -93,7 +93,7 @@ pygrid/
 │   ├── CLAUDE.md                 # TUTOR RULES (Socratic)
 │   └── week1/ ...
 └── progress/
-    ├── verifications.json        # append-only log of passing checks
+    ├── verifications.jsonl       # append-only log, one JSON record per line
     └── quizzes/                  # quiz attempt results
 ```
 
@@ -106,7 +106,7 @@ pygrid/
 | Endpoint | Purpose |
 |---|---|
 | `GET /api/tracker` | Parsed tracker: weeks → tasks → items with IDs and states |
-| `POST /api/tracker/check` | Tick an item. **Refused unless** `progress/verifications.json` has a passing record for that ID |
+| `POST /api/tracker/check` | Tick an item. **Refused unless** `progress/verifications.jsonl` has a passing record for that ID |
 | `GET /api/files/tree`, `GET/PUT /api/files?path=` | Read/write inside `workspace/` only (resolve and reject path traversal) |
 | `POST /api/tests/run` | Run `pytest` on a task folder; stream output; parse JUnit XML for the pass/fail summary |
 | `WS /api/pty` | Spawn a shell or `python <file>` in a real pty; bidirectional stream to xterm.js; handle resize |
@@ -241,12 +241,14 @@ The parser must round-trip: parse → serialize must produce a byte-identical fi
 
 Answers never reach the browser; grading happens server-side. The CLI runner (`rich` + `inquirer`) reads the same spec and writes the same result format.
 
-### Verification record: `progress/verifications.json` (append-only)
+### Verification record: `progress/verifications.jsonl` (append-only)
 
 ```json
 { "item": "W1.3.c", "kind": "pytest", "passed": true, "summary": "6 passed",
   "at": "2026-10-12T21:20:00-04:00", "by": "claude-code|app" }
 ```
+
+`kind` is `pytest`, `quiz`, `tutor` (a recorded tutor check, for items with no automated test) or `artifact` (a required file such as `implementation_plan.md` exists). A failed record never unlocks a tick.
 
 ---
 

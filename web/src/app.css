@@ -1,17 +1,95 @@
 .app { display: flex; flex-direction: column; height: 100%; }
 .app-main { flex: 1; overflow: auto; padding: 24px; }
+.app-main > h1 { max-width: 1200px; }
 
-.specimen {
+.banner { margin: 0 0 16px; max-width: 1200px; }
+
+/* ── Dashboard layout ──────────────────────────────────── */
+.dashboard {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-areas:
+    "next   recent"
+    "weeks  weeks"
+    "detail detail";
   gap: 16px;
-  max-width: 1100px;
+  max-width: 1200px;
 }
-.specimen .span-2 { grid-column: span 2; }
-.specimen p { margin: 0 0 8px; }
+.dash-next { grid-area: next; }
+.dash-recent { grid-area: recent; }
+.week-grid { grid-area: weeks; }
+.dash-detail { grid-area: detail; }
+.dashboard p { margin: 0 0 8px; }
 
+.next-line { font-size: 15px; }
+.next-id { color: var(--accent-2); }
+.overall { margin-top: 12px !important; }
+
+.recent { list-style: none; margin: 0; padding: 0; }
+.recent li {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 1ch;
+  align-items: baseline;
+  padding: 2px 0;
+  font-size: 13px;
+}
+.recent-item { color: var(--text); }
+.recent li .muted:nth-child(3) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Week grid ─────────────────────────────────────────── */
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.week-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color var(--motion) linear;
+}
+.week-card:hover { border-color: var(--text-muted); }
+.week-card.is-current { border-color: var(--accent-2); }
+.week-card.is-selected { border-color: var(--accent); }
+.week-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  min-height: 22px;
+}
+.week-card-now { color: var(--accent-2); }
+.week-card-title { font-size: 13px; min-height: 3em; }
+/* Dimmed via muted colours, not opacity, so locked text still meets AA. */
+.week-card.is-locked .week-card-title,
+.week-card.is-locked .progress { color: var(--text-muted); }
+.week-card.is-locked .progress-on { color: var(--text-muted); }
+
+/* ── Week detail ───────────────────────────────────────── */
+.task { margin-top: 18px; }
+.task h3 { font-size: 13px; margin-bottom: 6px; }
+.refusal { color: var(--danger); }
+.detail-foot { margin-top: 16px !important; text-align: right; }
+.link { color: var(--text-muted); }
+.link:hover { color: var(--accent); }
+
+@media (max-width: 900px) {
+  .week-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "next" "recent" "weeks" "detail";
+  }
+}
 @media (max-width: 720px) {
   .app-main { padding: 16px; }
-  .specimen { grid-template-columns: 1fr; }
-  .specimen .span-2 { grid-column: auto; }
+  .checklist li { grid-template-columns: 3ch 1fr; }
+  .checklist-id { display: none; }
 }
+.week-card .progress { margin-top: auto; }

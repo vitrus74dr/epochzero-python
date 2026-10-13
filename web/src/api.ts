@@ -1,3 +1,5 @@
+import type { TrackerData } from './types'
+
 export type SessionState = 'ok' | 'expired' | 'offline'
 
 let sessionPromise: Promise<SessionState> | null = null
@@ -35,3 +37,25 @@ async function exchangeToken(): Promise<SessionState> {
     return 'offline'
   }
 }
+
+export type Result<T> = { ok: true; data: T } | { ok: false; status: number; error: string }
+
+async function call<T>(path: string, init?: RequestInit): Promise<Result<T>> {
+  try {
+    const res = await fetch(path, init)
+    const body = await res.json().catch(() => ({}))
+    if (res.ok) return { ok: true, data: body as T }
+    return { ok: false, status: res.status, error: body.detail ?? res.statusText }
+  } catch {
+    return { ok: false, status: 0, error: 'API offline' }
+  }
+}
+
+export const getTracker = () => call<TrackerData>('/api/tracker')
+
+export const checkItem = (item: string, checked: boolean) =>
+  call<TrackerData>('/api/tracker/check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item, checked }),
+  })

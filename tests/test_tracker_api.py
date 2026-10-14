@@ -52,7 +52,7 @@ def test_check_with_verification_ticks_one_byte(client, paths):
     assert data["current"]["item"]["id"] == "W1.1.b"
     assert data["recent"][0]["item"] == "W1.1.a"
     assert paths.tracker.read_text(encoding="utf-8") == before      # the curriculum file is never written
-    assert json.loads(paths.checked.read_text()) == {"checked": ["W1.1.a"]}
+    assert json.loads(paths.checked.read_text(encoding="utf-8")) == {"checked": ["W1.1.a"]}
 
 
 def test_locked_week_refused_even_with_verification(client, paths):
@@ -121,12 +121,12 @@ def test_untick_removes_from_progress(client, paths):
     client.post("/api/tracker/check", json={"item": "W1.1.a"})
     r = client.post("/api/tracker/check", json={"item": "W1.1.a", "checked": False})
     assert r.status_code == 200 and r.json()["weeks"][0]["done"] == 0
-    assert json.loads(paths.checked.read_text()) == {"checked": []}
+    assert json.loads(paths.checked.read_text(encoding="utf-8")) == {"checked": []}
 
 
 def test_legacy_ticks_in_the_tracker_are_imported_once(paths):
-    text = paths.tracker.read_text().replace("- [ ] [W1.1.a]", "- [x] [W1.1.a]")
-    paths.tracker.write_text(text)
+    text = paths.tracker.read_text(encoding="utf-8").replace("- [ ] [W1.1.a]", "- [x] [W1.1.a]")
+    paths.tracker.write_text(text, encoding="utf-8")
     assert load_state(paths).item("W1.1.a").checked          # no progress file yet: imported
     write_checked(paths, set())                                # from now on the progress file rules
     assert not load_state(paths).item("W1.1.a").checked
@@ -147,9 +147,9 @@ def test_corrupt_progress_is_an_error_not_a_reset(client, paths):
     assert r.status_code == 422 and "checked.json" in r.json()["detail"]
     verify(paths, "W1.1.a")
     assert client.post("/api/tracker/check", json={"item": "W1.1.a"}).status_code == 422
-    assert paths.checked.read_text() == "{oops"                # not overwritten
+    assert paths.checked.read_text(encoding="utf-8") == "{oops"                # not overwritten
 
 
 def test_shipped_tracker_has_no_ticks():
     """The curriculum file in the repo stays pristine: ticks belong in progress/."""
-    assert "- [x]" not in REAL.read_text() and "- [X]" not in REAL.read_text()
+    assert "- [x]" not in REAL.read_text(encoding="utf-8") and "- [X]" not in REAL.read_text(encoding="utf-8")

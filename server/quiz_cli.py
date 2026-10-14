@@ -21,6 +21,7 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.theme import Theme
 
+from server.compat import utf8_stdio
 from server import quizzes
 from server.paths import ROOT, Paths
 
@@ -69,6 +70,7 @@ def report(console: Console, quiz: quizzes.Quiz, attempt: dict) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(prog="epochzero-quiz")
     parser.add_argument("quiz_id", help="e.g. W1.2.quiz")
     parser.add_argument("--root", type=Path, default=Path(os.environ.get("EPOCHZERO_ROOT") or ROOT))

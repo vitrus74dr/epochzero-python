@@ -43,7 +43,7 @@ def test_pass_records_and_unlocks_tick(client, paths, quiz):
 
     [rec] = VerificationLog(paths.verifications).read()
     assert (rec.item, rec.kind, rec.passed, rec.by) == ("W1.2.b", "quiz", True, "app")
-    saved = json.loads((paths.quiz_results / "W1.2.quiz.json").read_text())
+    saved = json.loads((paths.quiz_results / "W1.2.quiz.json").read_text(encoding="utf-8"))
     assert saved["item"] == "W1.2.b" and len(saved["attempts"]) == 1
     assert client.post("/api/tracker/check", json={"item": "W1.2.b"}).status_code == 200
 
@@ -60,7 +60,7 @@ def test_fail_records_but_does_not_unlock(client, paths, quiz):
 def test_attempts_accumulate(client, paths, quiz):
     for _ in range(2):
         client.post("/api/quizzes/W1.2.quiz/submit", json={"answers": ALL_RIGHT})
-    saved = json.loads((paths.quiz_results / "W1.2.quiz.json").read_text())
+    saved = json.loads((paths.quiz_results / "W1.2.quiz.json").read_text(encoding="utf-8"))
     assert len(saved["attempts"]) == 2
     assert client.get("/api/quizzes").json()["quizzes"][0]["last"]["score"] == 3
 

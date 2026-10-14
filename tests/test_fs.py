@@ -49,7 +49,7 @@ def test_create_read_update_cycle(client, paths):
                    json={"content": "print('hi')\n"})
     assert r.status_code == 200
     v1 = r.json()["version"]
-    assert (paths.workspace / "week1" / "hello.py").read_text() == "print('hi')\n"
+    assert (paths.workspace / "week1" / "hello.py").read_text(encoding="utf-8") == "print('hi')\n"
 
     got = client.get("/api/files", params={"path": "week1/hello.py"}).json()
     assert got["content"] == "print('hi')\n" and got["version"] == v1
@@ -72,10 +72,10 @@ def test_stale_save_conflicts_then_force_wins(client, paths):
     f.write_text("changed by claude code\n", encoding="utf-8")  # edit behind the editor's back
     r = client.put("/api/files", params={"path": "a.py"}, json={"content": "two\n", "base_version": v})
     assert r.status_code == 409 and "changed on disk" in r.json()["detail"]
-    assert f.read_text() == "changed by claude code\n"
+    assert f.read_text(encoding="utf-8") == "changed by claude code\n"
     r = client.put("/api/files", params={"path": "a.py"},
                    json={"content": "two\n", "base_version": v, "force": True})
-    assert r.status_code == 200 and f.read_text() == "two\n"
+    assert r.status_code == 200 and f.read_text(encoding="utf-8") == "two\n"
 
 
 @pytest.mark.skipif(os.name == "nt", reason="Windows has no POSIX file modes")

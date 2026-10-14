@@ -71,7 +71,7 @@ def test_structure_of_real_tracker():
 def test_published_items_never_change():
     """IDs are stable (CLAUDE.md): items may be added, but every item ever
     published keeps its ID and wording. Append new ones to the fixture."""
-    published = (Path(__file__).parent / "fixtures/tracker_items.txt").read_text().splitlines()
+    published = (Path(__file__).parent / "fixtures/tracker_items.txt").read_text(encoding="utf-8").splitlines()
     current = {f"[{i.id}] {i.text}" for i in tr.load(REAL).items()}
     missing = [line for line in published if line not in current]
     assert missing == [], f"renumbered or reworded: {missing}"
@@ -126,5 +126,5 @@ def test_write_atomic_leaves_no_temp_files(tmp_path):
 def test_app_project_has_no_uv_workspace():
     """workspace/ (the learner's uv project) must stay separate from the app's.
     A plain `uv init` inside it adds [tool.uv.workspace] here; see README."""
-    pyproject = (REAL.parent / "pyproject.toml").read_text()
+    pyproject = (REAL.parent / "pyproject.toml").read_text(encoding="utf-8")
     assert "[tool.uv.workspace]" not in pyproject

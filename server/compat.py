@@ -69,3 +69,14 @@ def default_shell() -> list[str]:
                 return [path, "-NoLogo"]
         return [os.environ.get("COMSPEC") or "cmd.exe"]
     return [os.environ.get("SHELL") or "/bin/bash"]
+
+
+def utf8_stdio() -> None:
+    """Our CLIs print ▸, ✓ and friends. On Windows, stdout piped to another program
+    (CI, Claude Code reading the tutor CLI) defaults to the ANSI code page, which
+    can't encode them: switch to UTF-8. Elsewhere it's UTF-8 already."""
+    import sys
+    if WINDOWS:
+        for stream in (sys.stdout, sys.stderr):
+            with contextlib.suppress(AttributeError, ValueError):
+                stream.reconfigure(encoding="utf-8", errors="replace")

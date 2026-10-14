@@ -13,15 +13,17 @@ recognise (rules, focus lines, blank lines) is preserved untouched.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import tempfile
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from server.compat import lock_exclusive, unlock
+from server.compat import WINDOWS, lock_exclusive, unlock
 
 WEEK_RE = re.compile(r"^## Week (\d+): (.+?)\s*$")
 SECTION_RE = re.compile(r"^## (.+?)\s*$")
@@ -206,17 +208,34 @@ def locked(lock_path: Path) -> Iterator[None]:
 def write_atomic(path: Path, text: str) -> None:
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
     try:
-        # mkstemp creates 0600; keep the existing file's mode, or use the umask default.
-        try:
-            mode = path.stat().st_mode & 0o7777
-        except FileNotFoundError:
-            umask = os.umask(0)
-            os.umask(umask)
-            mode = 0o666 & ~umask
-        os.fchmod(fd, mode)
+        if hasattr(os, "fchmod"):  # POSIX: mkstemp creates 0600; keep the file's mode
+            try:
+                mode = path.stat().st_mode & 0o7777
+            except FileNotFoundError:
+                umask = os.umask(0)
+                os.umask(umask)
+                mode = 0o666 & ~umask
+            os.fchmod(fd, mode)
         with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
+            fd = -1  # the file object owns it now
             fh.write(text)
-        os.replace(tmp, path)
+        replace_retrying(tmp, path)
     except BaseException:
-        os.unlink(tmp)
+        if fd != -1:
+            os.close(fd)
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
         raise
+
+
+def replace_retrying(src: str, dest: Path) -> None:
+    """os.replace, retried briefly: on Windows it fails while another thread or
+    process (a reader, an antivirus scan) has the destination open."""
+    for attempt in range(50):
+        try:
+            os.replace(src, dest)
+            return
+        except PermissionError:
+            if not WINDOWS or attempt == 49:
+                raise
+            time.sleep(0.02)

@@ -47,7 +47,7 @@ def test_scaffold_copies_without_overwriting(with_curriculum, capsys):
     (dest / "calculator.py").write_text("# learner's work\n")
     assert tutor_cli.main([*root, "scaffold", "W1.3"]) == 0
     assert "kept    calculator.py" in capsys.readouterr().out
-    assert (dest / "calculator.py").read_text() == "# learner's work\n"
+    assert (dest / "calculator.py").read_text(encoding="utf-8") == "# learner's work\n"
 
 
 def test_scaffold_into_existing_task_folder(with_curriculum):
@@ -97,7 +97,7 @@ def third_party_imports(folder: Path) -> set[str]:
     local = {p.stem for p in folder.glob("*.py")}
     names = set()
     for f in folder.glob("*.py"):
-        for node in ast.walk(ast.parse(f.read_text())):
+        for node in ast.walk(ast.parse(f.read_text(encoding="utf-8"))):
             if isinstance(node, ast.Import):
                 names |= {a.name.split(".")[0] for a in node.names}
             elif isinstance(node, ast.ImportFrom) and node.module and not node.level:
@@ -136,7 +136,7 @@ def test_lesson_add(paths, capsys):
     draft.write_text("# Control Flow\n\nBody")
     assert tutor_cli.main([*root, "lesson-add", "W1.2", str(draft)]) == 0
     assert "installed: curriculum/week1/lesson_1_2.md" in capsys.readouterr().out
-    assert (paths.curriculum / "week1/lesson_1_2.md").read_text() == "# Control Flow\n\nBody\n"
+    assert (paths.curriculum / "week1/lesson_1_2.md").read_text(encoding="utf-8") == "# Control Flow\n\nBody\n"
     assert tutor_cli.main([*root, "lesson-add", "1.2", str(draft)]) == 0
     assert "replaced" in capsys.readouterr().out
     assert tutor_cli.main([*root, "lesson-add", "2.1", str(draft)]) == 1

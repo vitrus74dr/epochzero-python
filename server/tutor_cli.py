@@ -35,6 +35,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from server.compat import utf8_stdio
 from server import lessons, quizzes
 from server import progress
 from server import tracker as tr
@@ -373,6 +374,7 @@ def cmd_quiz_results(paths: Paths, args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(prog="epochzero-tutor", description=__doc__.split("\n\n")[0])
     parser.add_argument("--root", type=Path,
                         default=Path(os.environ.get("EPOCHZERO_ROOT") or ROOT),

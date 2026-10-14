@@ -81,7 +81,7 @@ def test_verify_task_then_checkoff(paths, tutor):
 
     code, out = tutor("checkoff", "W1.3.c")
     assert code == 0 and "ticked: W1.3.c" in out
-    assert "W1.3.c" in paths.checked.read_text() and "- [x]" not in paths.tracker.read_text()
+    assert "W1.3.c" in paths.checked.read_text(encoding="utf-8") and "- [x]" not in paths.tracker.read_text(encoding="utf-8")
 
 
 def test_verify_fail_blocks_checkoff(paths, tutor):
@@ -200,7 +200,7 @@ def test_quiz_add_installs_draft(paths, tutor):
     draft.write_text(json.dumps(QUIZ))
     code, out = tutor("quiz-add", str(draft))
     assert code == 0 and "installed: curriculum/week1/quiz_1_2.json (W1.2.quiz, verifies W1.2.b)" in out
-    assert json.loads((paths.curriculum / "week1/quiz_1_2.json").read_text())["id"] == "W1.2.quiz"
+    assert json.loads((paths.curriculum / "week1/quiz_1_2.json").read_text(encoding="utf-8"))["id"] == "W1.2.quiz"
     # Re-adding replaces it; the same id under another file name is refused.
     assert tutor("quiz-add", str(draft))[0] == 0
     (paths.curriculum / "week1/quiz_old.json").write_text(json.dumps(QUIZ))
@@ -235,4 +235,4 @@ def test_practice_quiz_records_nothing(client, paths, quiz):
                        json={"answers": {"q1": 0, "q2": 1, "q3": 1}}).json()
     assert body["passed"] and body["item"] is None
     assert records(paths) == []
-    assert json.loads((paths.quiz_results / "W1.1.check.json").read_text())["attempts"]
+    assert json.loads((paths.quiz_results / "W1.1.check.json").read_text(encoding="utf-8"))["attempts"]

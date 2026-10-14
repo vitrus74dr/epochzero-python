@@ -50,7 +50,8 @@ def child_env() -> dict[str, str]:
                                   if p not in app_bins)
     for k in ("PYTHONHOME", "PYTHONPATH", "UV_PROJECT_ENVIRONMENT"):
         env.pop(k, None)
-    env.update(TERM="xterm-256color", COLORTERM="truecolor", EPOCHZERO="1")
+    # PYTHONUTF8: open() and print() use UTF-8 even on Windows, as the lessons assume.
+    env.update(TERM="xterm-256color", COLORTERM="truecolor", EPOCHZERO="1", PYTHONUTF8="1")
     return env
 
 

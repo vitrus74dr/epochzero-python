@@ -30,6 +30,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from server.compat import WINDOWS, utf8_stdio
 from server import fs, lessons, pty_ws, quizzes, tests_runner, tracker_api
 from server.paths import ROOT, Paths
 from server.watch import EventHub, watch_root
@@ -177,9 +178,14 @@ def build_web() -> None:
 
 def port_free(port: int) -> bool:
     """True unless something is listening on the port. SO_REUSEADDR, as uvicorn
-    uses, so connections lingering in TIME_WAIT after a restart don't count."""
+    uses, so connections lingering in TIME_WAIT after a restart don't count. (On
+    Windows SO_REUSEADDR would let us bind over a live listener; the default
+    there already ignores TIME_WAIT, and SO_EXCLUSIVEADDRUSE refuses a listener.)"""
     with socket.socket() as s:
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if WINDOWS:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        else:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             s.bind(("127.0.0.1", port))
         except OSError:
@@ -188,6 +194,7 @@ def port_free(port: int) -> bool:
 
 
 def run() -> None:
+    utf8_stdio()
     parser = argparse.ArgumentParser(prog="epochzero")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--dev", action="store_true",

@@ -41,6 +41,10 @@ live in `progress/checked.json` (`server/progress.py`), so students can `git pul
 - Tutor commands must call plain `epochzero-tutor ...`: Claude Code's permission check refuses
   commands with shell variable expansion, and the tutor session can only touch `workspace/`,
   so anything outside it (tracker, progress/, curriculum/) needs a `epochzero-tutor` subcommand.
+- Linux, macOS and Windows: platform differences live only in `server/compat.py` (locks,
+  process-tree kill, shell, venv dir, UTF-8 stdio) and `server/terminal.py` (ptyprocess vs
+  pywinpty). Read/write text with `encoding="utf-8"`. `.github/workflows/tests.yml` runs the
+  app tests, `tools/smoke_launch.py` and the tutor shims on all three; keep it green.
 - Task folders are `workspace/weekN/tN.M-<slug>/` (`server/tasks.py`).
 - Curriculum content: `curriculum/weekN/lesson_N_M.md`, `quiz_N_M.json`, `stubs/tN.M-<slug>/`.
   Stubs hold tests plus signature-only code, never solutions; `tests/test_lessons.py` checks

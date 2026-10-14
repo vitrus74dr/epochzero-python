@@ -128,7 +128,7 @@ asks for. For `busiest_hour`, the tie rule is "the earliest hour". Think about w
 uv run python organize.py ~/Downloads --dry-run
 ```
 
-Read the plan before you run it without `--dry-run`. For the analyzer, make a log by
+(In Windows PowerShell, write the folder as `$HOME\Downloads`.) Read the plan before you run it without `--dry-run`. For the analyzer, make a log by
 hand (copy the lines from `test_logstats.py`), or point it at a real one.
 
 ## 7. How it's checked

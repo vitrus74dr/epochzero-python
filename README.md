@@ -14,9 +14,12 @@ A companion to [epochzero.org](https://epochzero.org).
 
 ## What you need
 
-- **Linux or macOS.** (Windows isn't supported.)
+- **Linux, macOS or Windows 10/11.** Windows is newer here than Linux and macOS: it passes
+  the same automated tests, but has had less hands-on use, so please report anything odd.
 - **git** and **[uv](https://docs.astral.sh/uv/getting-started/installation/)**, a Python
-  tool that installs Python 3.12 for you. You don't need Python installed already.
+  tool that installs Python 3.12 for you. You don't need Python installed already. On
+  Windows, install [Git for Windows](https://git-scm.com/download/win) (Claude Code needs
+  its Git Bash too), and run the commands below in PowerShell.
 - **[Claude Code](https://claude.com/claude-code)** for the tutor. This needs a Claude
   account. Without it you can still read every lesson, run tests and take quizzes, but the
   checks that need a tutor (and the `/grill-me` design interviews) won't be available.
@@ -36,7 +39,8 @@ minutes on a slow connection), then opens the course in your browser. Next time,
 Then, in the app:
 
 1. Press **`g l`** (or click *lesson*) to read the first lesson.
-2. Open the **workbench** (`g w`) and its **shell** tab: a terminal in your `workspace/` folder.
+2. Open the **workbench** (`g w`) and its **shell** tab: a terminal in your `workspace/` folder
+   (bash or zsh on Linux and macOS, PowerShell on Windows).
 3. Run **`claude`** there. Accept the *trust this folder* prompt the first time, then say hi.
    The tutor looks at your progress and tells you where you are and what's next.
 
@@ -69,6 +73,7 @@ are never part of the course files, so updates can't overwrite or conflict with 
 | *"127.0.0.1:8765 is in use"* | It's already running in another terminal; or start another copy with `uv run epochzero --port 8770`. |
 | *"session expired"* in the browser | Each launch prints a new link with a fresh key. Use the latest one from the terminal. |
 | The tutor can't run `epochzero-tutor` | Start `claude` from the app's own terminal (workbench ▸ shell), which sets it up. |
+| Windows: `uv` isn't found after installing it | Close and reopen PowerShell so it picks up the new PATH. |
 | A game window doesn't appear | Arcade games open a real window on your desktop; check behind the browser. |
 | Week 1 setup changed this repo's `pyproject.toml` | You ran `uv init` without `--no-workspace` (see lesson 1.1). Ask the tutor; it knows the fix. |
 

@@ -18,10 +18,7 @@ Only a run with at least one passing test and no failures or errors passes.
 from __future__ import annotations
 
 import asyncio
-import contextlib
 import json
-import os
-import signal
 import tempfile
 import xml.etree.ElementTree as ET
 from collections.abc import AsyncIterator
@@ -33,6 +30,7 @@ from pydantic import BaseModel
 
 from server import progress
 from server import tracker as tr
+from server.compat import kill_tree, new_group_kwargs
 from server.fs import SandboxError, resolve_in
 from server.paths import Paths
 from server.pty_ws import child_env, learner_python
@@ -129,7 +127,7 @@ async def run_pytest(paths: Paths, rel: str, items: list[str],
         proc = await asyncio.create_subprocess_exec(
             *argv, cwd=cwd, env=env, stdin=asyncio.subprocess.DEVNULL,
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
-            start_new_session=True)
+            **new_group_kwargs())
         error = None
         output_tail = ""
         try:
@@ -144,8 +142,7 @@ async def run_pytest(paths: Paths, rel: str, items: list[str],
             error = f"timed out after {TIMEOUT_SECONDS}s"
         finally:
             if proc.returncode is None:
-                with contextlib.suppress(ProcessLookupError):
-                    os.killpg(proc.pid, signal.SIGKILL)
+                kill_tree(proc.pid)
                 await proc.wait()
 
         tests: list[dict] = []

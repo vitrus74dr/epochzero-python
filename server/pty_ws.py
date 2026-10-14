@@ -12,7 +12,7 @@ Protocol
                           {"type": "error", "message": "..."}
 
 The process runs as the user with cwd inside workspace/. It is NOT sandboxed.
-POSIX only (ptyprocess); Windows would need pywinpty behind the same protocol.
+ptyprocess on POSIX, pywinpty (ConPTY) on Windows: see server/terminal.py.
 """
 
 from __future__ import annotations
@@ -22,19 +22,18 @@ import contextlib
 import json
 import os
 import shutil
-import signal
 import sys
 from pathlib import Path
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from ptyprocess import PtyProcess
 
+from server.compat import VENV_BIN, WINDOWS, default_shell
 from server.fs import SandboxError, resolve_in
 from server.paths import ROOT, Paths
 from server.quizzes import QUIZ_ID_RE
+from server.terminal import Terminal
 
 MAX_PTYS = 8
-READ_CHUNK = 65536
 
 
 class SpawnError(Exception):
@@ -46,7 +45,7 @@ def child_env() -> dict[str, str]:
     and `uv` in the terminal see the learner's setup, not the app's."""
     env = dict(os.environ)
     venv = env.pop("VIRTUAL_ENV", None)
-    app_bins = {str(ROOT / ".venv" / "bin")} | ({str(Path(venv) / "bin")} if venv else set())
+    app_bins = {str(ROOT / ".venv" / VENV_BIN)} | ({str(Path(venv) / VENV_BIN)} if venv else set())
     env["PATH"] = os.pathsep.join(p for p in env.get("PATH", "").split(os.pathsep)
                                   if p not in app_bins)
     for k in ("PYTHONHOME", "PYTHONPATH", "UV_PROJECT_ENVIRONMENT"):
@@ -69,7 +68,7 @@ def command_for(paths: Paths, mode: str, file: str | None) -> tuple[list[str], P
     mode "run" and a quiz id for mode "quiz"."""
     ws = paths.workspace.resolve()
     if mode == "shell":
-        return [os.environ.get("SHELL") or "/bin/bash"], ws
+        return default_shell(), ws
     if mode == "quiz":
         # The quiz runner is part of the app, so it runs on the app's Python.
         if not file or not QUIZ_ID_RE.match(file):
@@ -99,23 +98,8 @@ def learner_python(ws: Path, start: Path) -> list[str]:
             return [uv, "run", "--project", str(d), "python"]
         if d == ws:
             break
-    return [shutil.which("python3", path=path) or "python3"]
-
-
-def stop_process(proc: PtyProcess) -> None:
-    """Hang up the whole session (shell and its jobs), then make sure it's dead."""
-    with contextlib.suppress(ProcessLookupError, PermissionError):
-        os.killpg(proc.pid, signal.SIGHUP)
-    with contextlib.suppress(Exception):
-        proc.terminate(force=True)
-
-
-def exit_code(proc: PtyProcess) -> int | None:
-    with contextlib.suppress(Exception):
-        proc.wait()
-    if proc.signalstatus is not None:
-        return -proc.signalstatus
-    return proc.exitstatus
+    python = "python" if WINDOWS else "python3"
+    return [shutil.which(python, path=path) or python]
 
 
 def router(paths: Paths) -> APIRouter:
@@ -142,32 +126,20 @@ def router(paths: Paths) -> APIRouter:
 
         paths.workspace.mkdir(exist_ok=True)
         try:
-            proc = PtyProcess.spawn(argv, cwd=str(cwd), env=terminal_env(paths),
-                                    dimensions=(max(rows, 1), max(cols, 1)))
+            term = Terminal(argv, cwd, terminal_env(paths), max(rows, 1), max(cols, 1))
         except Exception as e:
             await fail(f"could not start {argv[0]}: {e}")
             return
 
-        active.add(proc.pid)
-        loop = asyncio.get_running_loop()
+        active.add(term.pid)
         output: asyncio.Queue[bytes] = asyncio.Queue()
-
-        def on_readable() -> None:
-            try:
-                data = os.read(proc.fd, READ_CHUNK)
-            except OSError:  # EIO once the child side closes
-                data = b""
-            if not data:
-                loop.remove_reader(proc.fd)
-            output.put_nowait(data)
-
-        loop.add_reader(proc.fd, on_readable)
-        await ws.send_text(json.dumps({"type": "started", "pid": proc.pid, "argv": argv}))
+        term.start_reading(output)
+        await ws.send_text(json.dumps({"type": "started", "pid": term.pid, "argv": argv}))
 
         async def pump_out() -> None:
             while data := await output.get():
                 await ws.send_bytes(data)
-            code = await asyncio.to_thread(exit_code, proc)
+            code = await asyncio.to_thread(term.exit_code)
             await ws.send_text(json.dumps({"type": "exit", "code": code}))
 
         async def pump_in() -> None:
@@ -176,17 +148,17 @@ def router(paths: Paths) -> APIRouter:
                 if msg["type"] == "websocket.disconnect":
                     return
                 if msg.get("bytes"):
-                    os.write(proc.fd, msg["bytes"])
+                    term.write(msg["bytes"])
                     continue
                 try:
                     m = json.loads(msg.get("text") or "")
                 except ValueError:
                     continue
                 if m.get("type") == "input" and isinstance(m.get("data"), str):
-                    os.write(proc.fd, m["data"].encode("utf-8"))
+                    term.write(m["data"].encode("utf-8"))
                 elif m.get("type") == "resize":
                     with contextlib.suppress(Exception):
-                        proc.setwinsize(max(int(m["rows"]), 1), max(int(m["cols"]), 1))
+                        term.resize(max(int(m["rows"]), 1), max(int(m["cols"]), 1))
 
         tasks = {asyncio.create_task(pump_out()), asyncio.create_task(pump_in())}
         try:
@@ -197,11 +169,10 @@ def router(paths: Paths) -> APIRouter:
                 if (exc := t.exception()) and not isinstance(exc, (WebSocketDisconnect, OSError)):
                     raise exc
         finally:
-            loop.remove_reader(proc.fd)
-            await asyncio.to_thread(stop_process, proc)
-            with contextlib.suppress(Exception):
-                proc.close(force=True)
-            active.discard(proc.pid)
+            term.stop_reading()
+            await asyncio.to_thread(term.stop)
+            term.close()
+            active.discard(term.pid)
             with contextlib.suppress(Exception):
                 await ws.close()
 

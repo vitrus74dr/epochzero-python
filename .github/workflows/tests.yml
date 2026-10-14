@@ -1,0 +1,35 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  app:
+    name: app (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: App tests
+        run: uv run pytest -q
+      - name: Launch like a student (uv run epochzero)
+        run: uv run python tools/smoke_launch.py
+      - name: Tutor shim (sh; Git Bash on Windows)
+        shell: bash
+        run: bin/epochzero-tutor status
+        env:
+          EPOCHZERO_ROOT: ${{ github.workspace }}
+      - name: Tutor shim (cmd)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: bin\epochzero-tutor.cmd status
+        env:
+          EPOCHZERO_ROOT: ${{ github.workspace }}

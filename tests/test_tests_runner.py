@@ -108,10 +108,9 @@ def test_bad_paths(client, paths, path, code):
 
 
 def test_missing_pytest_is_explained(client, paths, monkeypatch, tmp_path):
-    fake = tmp_path / "py"
-    fake.write_text("#!/bin/sh\necho \"No module named pytest\" >&2\nexit 1\n")
-    fake.chmod(0o755)
-    monkeypatch.setattr(tests_runner, "learner_python", lambda ws, start: [str(fake)])
+    fake = tmp_path / "no_pytest.py"     # a "python" whose -m pytest fails like the real thing
+    fake.write_text("import sys\nprint('No module named pytest', file=sys.stderr)\nsys.exit(1)\n")
+    monkeypatch.setattr(tests_runner, "learner_python", lambda ws, start: [sys.executable, str(fake)])
     folder = task(paths, {"test_calc.py": PASSING})
     _, events = run(client, path=folder)
     assert "uv add --dev pytest" in events[-1]["error"]

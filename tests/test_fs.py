@@ -17,7 +17,10 @@ def test_resolve_rejects_escapes(tmp_path, bad):
 def test_resolve_rejects_symlink_escape(tmp_path):
     ws = tmp_path / "ws"
     ws.mkdir()
-    (ws / "link").symlink_to(tmp_path)
+    try:
+        (ws / "link").symlink_to(tmp_path, target_is_directory=True)
+    except OSError:
+        pytest.skip("can't create symlinks here (Windows without Developer Mode)")
     with pytest.raises(SandboxError):
         resolve_in(ws, "link/secret.txt")
 
@@ -75,6 +78,7 @@ def test_stale_save_conflicts_then_force_wins(client, paths):
     assert r.status_code == 200 and f.read_text() == "two\n"
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Windows has no POSIX file modes")
 def test_save_keeps_file_mode(client, paths):
     f = paths.workspace / "run.sh"
     f.write_text("echo hi\n", encoding="utf-8")

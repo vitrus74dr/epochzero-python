@@ -13,7 +13,6 @@ recognise (rules, focus lines, blank lines) is preserved untouched.
 
 from __future__ import annotations
 
-import fcntl
 import os
 import re
 import tempfile
@@ -21,6 +20,8 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from server.compat import lock_exclusive, unlock
 
 WEEK_RE = re.compile(r"^## Week (\d+): (.+?)\s*$")
 SECTION_RE = re.compile(r"^## (.+?)\s*$")
@@ -195,11 +196,11 @@ def locked(lock_path: Path) -> Iterator[None]:
     """Exclusive advisory lock serializing tracker read-modify-write cycles."""
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with open(lock_path, "w") as fh:
-        fcntl.flock(fh, fcntl.LOCK_EX)
+        lock_exclusive(fh)
         try:
             yield
         finally:
-            fcntl.flock(fh, fcntl.LOCK_UN)
+            unlock(fh)
 
 
 def write_atomic(path: Path, text: str) -> None:

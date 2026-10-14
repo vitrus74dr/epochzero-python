@@ -1,11 +1,13 @@
 import json
 import os
+import subprocess
 import time
 
 import pytest
 from starlette.websockets import WebSocketDisconnect
 
 from conftest import HOST, ORIGIN
+from server.compat import VENV_BIN, WINDOWS
 
 
 def connect(client, **params):
@@ -87,20 +89,27 @@ def test_disconnect_kills_process(client, paths):
         pid = json.loads(ws.receive_text())["pid"]
         read_until(ws, "ready")
     for _ in range(50):
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            break
-        # A zombie still answers kill(0); check its state.
-        try:
-            with open(f"/proc/{pid}/stat") as fh:
-                if fh.read().split()[2] == "Z":
-                    break
-        except FileNotFoundError:
+        if not alive(pid):
             break
         time.sleep(0.1)
     else:
         pytest.fail(f"process {pid} survived the disconnect")
+
+
+def alive(pid: int) -> bool:
+    if WINDOWS:
+        out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"],
+                             capture_output=True, text=True).stdout
+        return str(pid) in out
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    try:  # a zombie still answers kill(0); check its state
+        with open(f"/proc/{pid}/stat") as fh:
+            return fh.read().split()[2] != "Z"
+    except FileNotFoundError:
+        return False  # no /proc (macOS): kill(0) succeeding on a reaped pid is unlikely
 
 
 def test_pty_requires_session(paths):
@@ -116,9 +125,9 @@ def test_pty_requires_session(paths):
 def test_child_env_drops_app_venv(monkeypatch):
     from server.paths import ROOT
     from server.pty_ws import child_env
-    venv_bin = str(ROOT / ".venv" / "bin")
+    venv_bin = str(ROOT / ".venv" / VENV_BIN)
     monkeypatch.setenv("VIRTUAL_ENV", str(ROOT / ".venv"))
-    monkeypatch.setenv("PATH", f"{venv_bin}:/usr/bin")
+    monkeypatch.setenv("PATH", os.pathsep.join([venv_bin, "/usr/bin"]))
     env = child_env()
     assert "VIRTUAL_ENV" not in env
     assert env["PATH"] == "/usr/bin"
@@ -175,3 +184,15 @@ def test_terminal_knows_app_and_data_roots(client, paths):
         read_more, _ = read_until(ws, "\n")
     out += read_more
     assert f"APP={ROOT}" in out and f"DATA={paths.root}" in out
+
+
+def test_default_shell_runs_a_command(client, paths, monkeypatch):
+    """The learner's shell (bash/zsh on POSIX, PowerShell on Windows) runs what's typed."""
+    if not WINDOWS:
+        monkeypatch.setenv("SHELL", "/bin/sh")   # no rc files: a predictable prompt
+    with connect(client, mode="shell") as ws:
+        assert json.loads(ws.receive_text())["type"] == "started"
+        ws.send_text(json.dumps({"type": "input", "data": "echo ez-$((6*7))-ok\r" if not WINDOWS
+                                 else "echo ('ez-' + (6*7) + '-ok')\r"}))
+        out, _ = read_until(ws, "ez-42-ok", limit=400)
+    assert "ez-42-ok" in out

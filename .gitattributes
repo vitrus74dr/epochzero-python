@@ -1,0 +1,7 @@
+# LF everywhere, even on Windows checkouts (Git for Windows defaults to CRLF): the course
+# parses its own text files (tracker, mazes, levels, quizzes) and runs its sh scripts.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.csv -text
+*.png binary
+*.ico binary

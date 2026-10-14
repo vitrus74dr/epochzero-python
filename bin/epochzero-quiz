@@ -1,1 +1,15 @@
-epochzero-tutor
+#!/bin/sh
+# Shim for epochzero-tutor (bin/epochzero-quiz is an identical copy; the name picks the
+# command). The cockpit terminal puts this directory on PATH so the tutor can run a plain
+# `epochzero-tutor status`: Claude Code's permission check refuses commands that
+# contain shell variable expansions like "$EPOCHZERO_APP". Outside the cockpit,
+# add <this repo>/bin to PATH yourself. On Windows, PowerShell and cmd use the .cmd
+# shims beside this file; Git Bash (which Claude Code uses there) uses this one.
+app="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$0")")/.." && pwd)"
+name="$(basename "$0")"
+for exe in "$app/.venv/bin/$name" "$app/.venv/Scripts/$name.exe"; do
+    if [ -x "$exe" ]; then
+        exec "$exe" "$@"
+    fi
+done
+exec uv run -q --project "$app" "$name" "$@"

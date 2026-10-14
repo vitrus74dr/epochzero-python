@@ -6,7 +6,8 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.115",
     "inquirer>=3.4.1",
-    "ptyprocess>=0.7.0",
+    "ptyprocess>=0.7.0; sys_platform != 'win32'",
+    "pywinpty>=2.0.14; sys_platform == 'win32'",
     "rich>=15.0.0",
     "uvicorn[standard]>=0.32",
 ]

@@ -88,7 +88,11 @@ export default function App() {
     <div className="app">
       <main className={`app-main ${onWorkbench ? 'is-workbench' : ''}`}>
         <header className="topbar">
-          <h1>EPOCHZERO <span className="brand-sub">PYTHON</span></h1>
+          <h1>
+            <a className="brand" href={hrefFor('dashboard')} title="EpochZero Python: dashboard (g d)">
+              EPOCHZERO<span className="brand-sub">·PYTHON</span>
+            </a>
+          </h1>
           <nav className="nav" aria-label="Views">
             <a href={hrefFor('dashboard')} className={route.view === 'dashboard' ? 'is-on' : ''}
                title="g d">dashboard</a>

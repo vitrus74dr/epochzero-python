@@ -267,4 +267,7 @@
   .lesson-criteria { position: static; }
 }
 
-.topbar .brand-sub { color: var(--text-muted); font-weight: 400; }
+/* The name is one link (to the dashboard), styled as a logo so ·PYTHON never reads as a nav tab. */
+.topbar .brand { color: var(--text); text-decoration: none; white-space: nowrap; }
+.topbar .brand:hover { color: var(--accent); }
+.topbar .brand-sub { color: var(--accent); font-weight: 400; }

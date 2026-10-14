@@ -35,7 +35,13 @@ def main() -> int:
 
     threading.Thread(target=read, daemon=True).start()
     try:
-        if not found.wait(180):
+        for _ in range(360):  # up to 180 s: the first run may download Python
+            if found.wait(0.5):
+                break
+            if proc.poll() is not None:
+                print(f"epochzero exited with {proc.returncode} before printing a link")
+                return 1
+        else:
             print("no link printed within 180 s")
             return 1
         url = re.search(r"http://\S+", "".join(lines)).group(0)

@@ -142,14 +142,17 @@ def test_quiz_in_terminal_with_arrow_keys(client, paths, quiz):
         ws.send_text(json.dumps({"type": "input", "data": data}))
 
     def until(needle):
-        # Play terminal: blessed (under inquirer) asks for the cursor position
-        # and waits for the reply, which xterm.js sends automatically.
+        # Play terminal: blessed (under inquirer) asks for the cursor position,
+        # and Windows' ConPTY also asks for the device attributes; both wait for
+        # the reply, which xterm.js sends automatically.
         out = ""
         for _ in range(200):
             msg = ws.receive()
             chunk = (msg.get("bytes") or b"").decode(errors="replace")
             for _ in range(chunk.count("\x1b[6n")):
                 send("\x1b[1;1R")
+            for _ in range(chunk.count("\x1b[c")):
+                send("\x1b[?1;2c")
             out += chunk
             if needle in out:
                 return out

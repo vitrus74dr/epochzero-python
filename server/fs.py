@@ -11,6 +11,7 @@ import os
 from pathlib import Path, PurePosixPath
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from server.paths import Paths
@@ -20,6 +21,12 @@ MAX_FILE_BYTES = 1_000_000
 MAX_TREE_ENTRIES = 2_000
 HIDDEN_DIRS = {"__pycache__", ".venv", "venv", ".pytest_cache", ".mypy_cache",
                ".ruff_cache", "node_modules", ".git"}
+
+
+# Images the workbench can preview (charts from matplotlib, game screenshots). Raster
+# only: an SVG can carry script, and this is served from the app's own origin.
+IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+               ".gif": "image/gif", ".webp": "image/webp"}
 
 
 class SandboxError(Exception):
@@ -108,6 +115,17 @@ def router(paths: Paths) -> APIRouter:
         except UnicodeDecodeError:
             raise HTTPException(415, f"{path} is not UTF-8 text") from None
         return {"path": path, "content": content, "version": version_of(p)}
+
+    @r.get("/image")
+    def image(path: str = Query(...)):
+        p = target(path)
+        kind = IMAGE_TYPES.get(p.suffix.lower())
+        if kind is None:
+            raise HTTPException(415, f"{path} is not a PNG, JPEG, GIF or WebP image")
+        if not p.is_file():
+            raise HTTPException(404, f"{path} not found")
+        return FileResponse(p, media_type=kind, headers={
+            "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
     @r.put("")
     def write(body: WriteRequest, path: str = Query(...)):

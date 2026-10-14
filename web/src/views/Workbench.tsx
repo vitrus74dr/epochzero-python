@@ -45,6 +45,10 @@ function defaultTestItem(t: TrackerData | null, eligible: Item[], cur: string | 
   return (items.find((i) => !i.checked) ?? items[0])?.id ?? ''
 }
 
+const IMAGE_RE = /\.(png|jpe?g|gif|webp)$/i
+const imageUrl = (path: string, stamp: number) =>
+  `/api/files/image?path=${encodeURIComponent(path)}&t=${stamp}`
+
 const dirOf = (path: string) => path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '.'
 
 export function Workbench({ file: routeFile, visible, tracker, onTestResult }: Props) {
@@ -58,6 +62,8 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
   const [run, setRun] = useState<{ key: number; file: string } | null>(null)
   const [termStatus, setTermStatus] = useState<Record<string, string>>({})
   const [testRun, setTestRun] = useState<TestRun | null>(null)
+  // An image open for preview instead of a text file; `stamp` reloads it after changes on disk.
+  const [image, setImage] = useState<{ path: string; stamp: number } | null>(null)
   // null = follow the tracker's current item (if it's a pytest item).
   const [testItem, setTestItem] = useState<string | null>(null)
 
@@ -80,6 +86,14 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
   }, [])
 
   const load = useCallback(async (path: string) => {
+    if (IMAGE_RE.test(path)) {
+      setImage({ path, stamp: Date.now() })
+      setOpen(null)
+      setConflict(null)
+      setNotice(null)
+      return
+    }
+    setImage(null)
     const r = await readFile(path)
     if (!r.ok) {
       setNotice(`${path}: ${r.error}`)
@@ -108,6 +122,8 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
     return onServerEvent(async (e) => {
       if (e.type !== 'workspace') return
       refreshTree()
+      setImage((img) => img && e.paths.includes(`workspace/${img.path}`)
+        ? { ...img, stamp: Date.now() } : img)
       const cur = state.current.open
       if (!cur || !e.paths.includes(`workspace/${cur.path}`)) return
       const r = await readFile(cur.path)
@@ -188,7 +204,7 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
   const status = (key: string) => (s: TermStatus, detail?: string) =>
     setTermStatus((prev) => ({ ...prev, [key]: s === 'exited' ? `exit ${detail}` : s }))
 
-  const editorMeta = open ? `${open.path}${dirty ? ' ●' : ''}` : 'no file'
+  const editorMeta = open ? `${open.path}${dirty ? ' ●' : ''}` : image ? image.path : 'no file'
 
   return (
     <div className="workbench" hidden={!visible}>
@@ -196,7 +212,7 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
         <Pane defaultSize="20" minSize={140} className="wb-pane">
           <Panel title="Files" meta="workspace/" className="wb-panel"
                  actions={<button className="hdr-btn" onClick={newFile} title="New file">[ + new ]</button>}>
-            <FileTree nodes={tree} current={open?.path ?? null}
+            <FileTree nodes={tree} current={open?.path ?? image?.path ?? null}
                       onOpen={(p) => navigate('workbench', p)} />
           </Panel>
         </Pane>
@@ -232,6 +248,11 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
                   <Editor key={`${open.path}:${open.loadId}`} path={open.path} initial={open.base}
                           onChange={setDraft} onSave={() => save()} onRun={runCurrent}
                           onRunTests={runTestsNow} />
+                ) : image ? (
+                  <div className="wb-image">
+                    <img src={imageUrl(image.path, image.stamp)} alt={image.path}
+                         onError={() => setNotice(`${image.path}: can't show this image`)} />
+                  </div>
                 ) : (
                   <p className="muted wb-empty">Pick a file on the left, or [ + new ].</p>
                 )}

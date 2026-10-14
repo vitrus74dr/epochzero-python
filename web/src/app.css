@@ -119,6 +119,10 @@
 .panel-body > .tree { padding: 6px 0; overflow: auto; flex: 1; }
 .wb-banner { padding: 6px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
 .wb-empty { padding: 12px 16px; }
+/* Image preview (charts, screenshots): centred, never wider than the panel. */
+.wb-image { flex: 1; min-height: 0; overflow: auto; padding: 12px 16px; background: var(--surface); }
+.wb-image img { display: block; max-width: 100%; height: auto; margin: 0 auto;
+  border: 1px solid var(--border); }
 .editor-host { flex: 1; min-height: 0; overflow: hidden; }
 .editor-host .cm-editor { height: 100%; }
 .editor-host .cm-editor.cm-focused { outline: none; }

@@ -92,3 +92,36 @@ def test_binary_and_missing_files(client, paths):
     (paths.workspace / "img.png").write_bytes(b"\x89PNG\xff\xfe")
     assert client.get("/api/files", params={"path": "img.png"}).status_code == 415
     assert client.get("/api/files", params={"path": "nope.py"}).status_code == 404
+
+
+def test_image_preview(client, paths):
+    png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
+    (paths.workspace / "charts").mkdir()
+    (paths.workspace / "charts" / "monthly.png").write_bytes(png)
+    r = client.get("/api/files/image", params={"path": "charts/monthly.png"})
+    assert r.status_code == 200 and r.content == png
+    assert r.headers["content-type"] == "image/png"
+    assert r.headers["x-content-type-options"] == "nosniff"
+
+
+@pytest.mark.parametrize("path,code", [
+    ("evil.svg", 415),            # SVG can carry script: never served from our origin
+    ("notes.txt", 415),
+    ("missing.png", 404),
+    ("../outside.png", 403),
+])
+def test_image_preview_refuses(client, paths, path, code):
+    (paths.workspace / "evil.svg").write_text("<svg onload='alert(1)'/>", encoding="utf-8")
+    (paths.workspace / "notes.txt").write_text("hi", encoding="utf-8")
+    assert client.get("/api/files/image", params={"path": path}).status_code == code
+
+
+def test_image_preview_needs_a_session(paths):
+    from fastapi.testclient import TestClient
+
+    from conftest import HOST
+    from server.main import create_app
+    (paths.workspace / "a.png").write_bytes(b"\x89PNG\r\n\x1a\n")
+    c = TestClient(create_app(token="t", root=paths.root, dist=paths.root / "x", watch=False),
+                   base_url=f"http://{HOST}")
+    assert c.get("/api/files/image", params={"path": "a.png"}).status_code == 401

@@ -1,5 +1,6 @@
 #!/bin/sh
-# Everything: app tests, UI build, lesson snippets (Arcade headless), stubs, levels.
+# Everything: app tests, UI build, lesson snippets (Arcade headless), stubs, reference
+# solutions (when $EPOCHZERO_SOLUTIONS or ../pygrid-solutions exists), levels.
 # Exit status 1 if any step fails.
 cd "$(dirname "$0")/.." || exit 2
 [ -d .learner-env ] || tools/learner_env.sh || exit 2
@@ -24,6 +25,13 @@ if [ $? -eq 0 ]; then echo "all $(echo "$out" | grep -c ': OK$') lessons ok"; el
 step "starter tests fail cleanly on the stubs"
 out=$(tools/check_stubs.sh)
 if [ $? -eq 0 ]; then echo "all $(echo "$out" | grep -c '^ok') stub folders ok"; else echo "$out" | grep -v "^ok "; fail=1; fi
+
+step "starter tests pass with the reference solutions (private, outside the repo)"
+out=$(tools/check_solutions.sh)
+if [ $? -eq 0 ]; then
+  n=$(echo "$out" | grep -c '^ok'); missing=$(echo "$out" | grep -c '^-- ')
+  case "$out" in "no solutions folder"*) echo "$out" ;; *) echo "$n stub folders ok, $missing without a solution" ;; esac
+else echo "$out" | grep -v "^ok "; fail=1; fi
 
 step "platformer levels reachable"
 python3 tools/check_levels.py curriculum/week6/stubs/t6.3-platformer/levels/*.txt || fail=1

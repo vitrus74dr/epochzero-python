@@ -85,7 +85,7 @@ per-launch key from the link it opens. Don't expose its port to a network.
 - **Checks:** `tools/check_all.sh` runs the app tests, rebuilds the UI (and fails if the
   committed build is stale), runs every code example in every lesson in a learner-like
   environment (Arcade programs headless), confirms each starter-test folder fails cleanly on
-  its stubs, and checks the platformer levels are playable. Run it after any change under `curriculum/`.
+  its stubs, proves each one can pass using private reference solutions (when present: `$EPOCHZERO_SOLUTIONS`, default `../pygrid-solutions`; never commit them here), and checks the platformer levels are playable. Run it after any change under `curriculum/`.
 - Course content: `curriculum/weekN/` (`lesson_N_M.md`, `quiz_N_M.json`, `stubs/`), with the
   curriculum structure in `CURRICULUM_TRACKER.md`. Never renumber or reword a tracker item;
   `tests/fixtures/tracker_items.txt` pins them.

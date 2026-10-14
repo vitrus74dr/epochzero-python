@@ -20,6 +20,10 @@ live in `progress/checked.json` (`server/progress.py`), so students can `git pul
   learner env with Arcade headless, stub tests fail cleanly, platformer levels reachable).
   `tools/learner_env.sh` creates `.learner-env/` with the course's libraries; the parts run
   separately too (`tools/check_md.py`, `tools/check_stubs.sh`, `tools/check_levels.py`).
+  `tools/check_solutions.sh` runs every stub's tests against the private reference solutions
+  in `$EPOCHZERO_SOLUTIONS` (default `../pygrid-solutions`, outside this public repo; skipped
+  if absent). Solutions must never be committed here. After changing a stub's tests, update
+  its solution there.
   Run it after any change under `curriculum/`.
 - Terminal quiz: `uv run epochzero-quiz <quiz id>` (needs a real TTY; the cockpit runs it in its pty)
 - Tutor CLI: `uv run epochzero-tutor status|verify|record|checkoff|quiz-add|quiz-results`; the

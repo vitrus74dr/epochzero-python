@@ -49,7 +49,7 @@ Press **`?`** anywhere in the app for the keyboard shortcuts.
 - **Every item needs proof** before you can tick it: a passing test run, a quiz score of
   4/5 or better, a design document, or a check by the tutor.
 - **Projects start with a design interview** (`/grill-me`): you make the decisions, the
-  tutor writes them up, and then you write tests and code against your own plan.
+  tutor writes them up as a plan and turns it into tests, and then you write the code.
 - **Your code lives in `workspace/`**, one folder per task (e.g. `workspace/week1/t1.3-calculator/`).
 
 ## Getting updates

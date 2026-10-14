@@ -32,6 +32,19 @@ function pytestItems(t: TrackerData | null): Item[] {
     .filter((i) => i.verify === 'pytest')
 }
 
+/** The item a test run records by default: the current item if it's a pytest item, else the
+ *  first unticked pytest item of the task whose folder is being tested, else none. */
+function defaultTestItem(t: TrackerData | null, eligible: Item[], cur: string | null,
+                         target: string | null): string {
+  if (cur && eligible.some((i) => i.id === cur)) return cur
+  if (!t || !target) return ''
+  const task = t.weeks.filter((w) => w.unlocked).flatMap((w) => w.tasks)
+    .find((task) => task.docs.folder !== null
+      && (target === task.docs.folder || target.startsWith(`${task.docs.folder}/`)))
+  const items = task?.items.filter((i) => i.verify === 'pytest') ?? []
+  return (items.find((i) => !i.checked) ?? items[0])?.id ?? ''
+}
+
 const dirOf = (path: string) => path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '.'
 
 export function Workbench({ file: routeFile, visible, tracker, onTestResult }: Props) {
@@ -49,13 +62,12 @@ export function Workbench({ file: routeFile, visible, tracker, onTestResult }: P
   const [testItem, setTestItem] = useState<string | null>(null)
 
   const eligible = pytestItems(tracker)
-  const cur = tracker?.current?.item
-  const defaultItem = cur && eligible.some((i) => i.id === cur.id) ? cur.id : ''
-  const chosenItem = testItem ?? defaultItem
   const curWeek = tracker?.weeks.find((w) => w.n === tracker.current?.week)
   const curFolder = curWeek?.tasks.find((t) => t.id === tracker?.current?.task)?.docs.folder ?? null
   // The open file's folder, else the current task's folder.
   const testTarget = open ? dirOf(open.path) : curFolder
+  const cur = tracker?.current?.item
+  const chosenItem = testItem ?? defaultTestItem(tracker, eligible, cur?.id ?? null, testTarget)
 
   const dirty = open !== null && draft !== open.base
   // Event handlers registered once need the latest state.

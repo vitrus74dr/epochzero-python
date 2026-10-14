@@ -137,3 +137,24 @@ def test_summarize_and_parse():
     assert summarize(tests, 1)[:2] == (False, "1 passed, 1 failed, 1 skipped")
     assert summarize(tests[:1], 0)[0] is True
     assert summarize([dict(tests[0], outcome="skipped")], 0)[0] is False
+
+
+def test_learner_tests_ignore_the_app_pytest_config(tmp_path):
+    """workspace/pytest.ini stops pytest walking up to the app's pyproject.toml, whose
+    options (timeout, pythonpath=tests) aren't the learner's: on a fresh clone every run
+    warned "Unknown config option: timeout"."""
+    import shutil
+    import subprocess
+
+    from server.paths import ROOT
+    shutil.copy(ROOT / "pyproject.toml", tmp_path / "pyproject.toml")
+    ws = tmp_path / "workspace"
+    (ws / "week1" / "t").mkdir(parents=True)
+    shutil.copy(ROOT / "workspace" / "pytest.ini", ws / "pytest.ini")
+    (ws / "week1" / "t" / "test_x.py").write_text(PASSING)
+    out = subprocess.run([sys.executable, "-m", "pytest", "-p", "no:cacheprovider", "."],
+                         cwd=ws / "week1" / "t", capture_output=True, text=True).stdout
+    assert f"rootdir: {ws}" in out and "configfile: pytest.ini" in out
+    assert "Unknown config option" not in out and "2 passed" in out
+    ignored = subprocess.run(["git", "check-ignore", "-q", "workspace/pytest.ini"], cwd=ROOT)
+    assert ignored.returncode == 1, "workspace/pytest.ini must not be gitignored: students need it"

@@ -10,6 +10,7 @@ web/node_modules/
 /progress/
 /workspace/*
 !/workspace/CLAUDE.md
+!/workspace/pytest.ini
 !/workspace/.claude/
 
 # Content-check tooling (tools/)

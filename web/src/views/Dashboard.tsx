@@ -104,7 +104,7 @@ export function Dashboard({ data, onUpdate }: Props) {
 
       <Panel title="Recent" meta="verifications" className="dash-recent">
         {data.recent.length === 0 ? (
-          <p className="muted">No verifications yet. They appear here as the tutor records them.</p>
+          <p className="muted">No verifications yet. Passing tests, quiz attempts and the tutor's checks appear here.</p>
         ) : (
           <ul className="recent">
             {data.recent.map((r, i) => (

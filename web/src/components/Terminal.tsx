@@ -23,6 +23,8 @@ const RESET = '\x1b[0m'
 export function Terminal({ mode, file, onStatus, active }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const fitRef = useRef<FitAddon | null>(null)
+  const termRef = useRef<XTerm | null>(null)
+  const mounted = useRef(false)
   const statusRef = useRef(onStatus)
   statusRef.current = onStatus
 
@@ -41,6 +43,7 @@ export function Terminal({ mode, file, onStatus, active }: Props) {
     fitRef.current = fit
     term.loadAddon(fit)
     term.open(host.current!)
+    termRef.current = term
     // Let app-level shortcuts through instead of sending them to the pty.
     term.attachCustomKeyEventHandler((e) => {
       const mod = e.ctrlKey || e.metaKey
@@ -107,11 +110,15 @@ export function Terminal({ mode, file, onStatus, active }: Props) {
     }
   }, [mode, file])
 
+  // A program just started (run, quiz) or the learner switched to this tab: keys should go
+  // to it, not stay in the editor. A shell mounting with the page doesn't take focus.
   useEffect(() => {
-    if (active) {
-      try { fitRef.current?.fit() } catch { /* ignore */ }
-    }
-  }, [active])
+    const first = !mounted.current
+    mounted.current = true
+    if (!active) return
+    try { fitRef.current?.fit() } catch { /* ignore */ }
+    if (!first || mode !== 'shell') termRef.current?.focus()
+  }, [active, mode])
 
   return <div className="terminal-host" ref={host} hidden={!active} />
 }

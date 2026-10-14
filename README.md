@@ -29,8 +29,9 @@ cd epochzero-python
 uv run epochzero
 ```
 
-The first run downloads Python and the app's libraries, then opens the course in your
-browser. Next time, `uv run epochzero` is all you need.
+The first run downloads Python and the app's libraries (about 50 MB, so give it a few
+minutes on a slow connection), then opens the course in your browser. Next time,
+`uv run epochzero` is all you need and starts in a second or two.
 
 Then, in the app:
 

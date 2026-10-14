@@ -18,6 +18,7 @@ from server.watch import EventHub, classify, watch_root
     (".CURRICULUM_TRACKER.md.abc.tmp", None),
     ("workspace/week1/__pycache__/calc.cpython-312.pyc", None),
     ("web/src/App.tsx", None),
+    ("", None),                     # the root itself: macOS FSEvents reports it
 ])
 def test_classify(rel, kind):
     root = Path("/r")

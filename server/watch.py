@@ -49,6 +49,8 @@ def classify(path: Path, root: Path) -> str | None:
     except ValueError:
         return None
     parts = rel.parts
+    if not parts:
+        return None  # the root itself (macOS reports directory-level changes)
     if any(p.startswith(".") or p == "__pycache__" for p in parts):
         return None  # lock files, temp files from atomic writes, caches
     if rel == Path("CURRICULUM_TRACKER.md"):

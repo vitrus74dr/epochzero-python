@@ -24,7 +24,7 @@ A companion to [epochzero.org](https://epochzero.org).
 ## Get started
 
 ```sh
-git clone https://github.com/<you>/epochzero-python.git
+git clone https://github.com/vitrus74dr/epochzero-python.git
 cd epochzero-python
 uv run epochzero
 ```

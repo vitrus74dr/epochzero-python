@@ -84,9 +84,16 @@ class WindowsTerminal:
                     text = self.proc.read(READ_CHUNK)
                 except (EOFError, OSError):
                     break
-                if text:
-                    loop.call_soon_threadsafe(output.put_nowait, text.encode("utf-8"))
-            loop.call_soon_threadsafe(output.put_nowait, b"")
+                if text and not deliver(text.encode("utf-8")):
+                    return
+            deliver(b"")
+
+        def deliver(data: bytes) -> bool:
+            try:
+                loop.call_soon_threadsafe(output.put_nowait, data)
+                return True
+            except RuntimeError:  # the event loop has closed: nobody is listening any more
+                return False
 
         threading.Thread(target=reader, name=f"pty-{self.pid}", daemon=True).start()
 
